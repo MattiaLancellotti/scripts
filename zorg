@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# TODO:
+#   - Signal trap (CTRL+C)
+
+# Backup device
+BORG_DEVICE="/dev/sda6"
+
+# Checking that the device is mounted
+MOUNT_POINT=$(findmnt ${BORG_DEVICE} -n -o TARGET)
+[ -z $MOUNT_POINT ] && exit 1
+
+# Creating a new backup
+borg create --verbose --noatime \
+  --stats --list --numeric-owner \
+  --progress --comment "$1" \
+  --compression auto,zstd,15 \
+  "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
+  /etc/portage/ /home/mattia/music /home/mattia/src /home/mattia/programming \
+  /home/mattia/pictures /var/lib/portage /usr/share/portage/config \
+  --exclude-caches
+
+# Deleting old backups
+borg prune --verbose --list \
+  --prefix="{user}-" --keep-within=10d --keep-weekly=4 --keep-monthly=1 \
+  "${MOUNT_POINT}/backups"
