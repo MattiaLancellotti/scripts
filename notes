@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# Notes' path
+NOTES_FILE=~/.notelist
+N_NOTES=$(wc -l $NOTES_FILE | awk '{print $1}')
+
+# log() and warn() are functions used to inform the user about different things
+log()  { echo "[@@] $1" >&1; }
+warn() { echo "[!!] $1" >&2; }
+
+add() {
+  log "Updating the notes file."
+
+  # Updating the file
+  echo "$1" >> $NOTES_FILE
+}
+
+list() {
+  # Checking if the file still exists
+  [ -s $NOTES_FILE ] && \
+    log "Showing your list of notes." && cat -n $NOTES_FILE || \
+    log "No notes to show." && exit 1;
+}
+
+show() {
+  [ ! -f $NOTES_FILE ] && \
+    warn "Your notes aren't here..." && exit 1;
+
+  # Deleting using sed
+  log "Showing $1 note."
+  sed -n "${1}p" $NOTES_FILE
+}
+
+delete() {
+  [ ! -s $NOTES_FILE ] && \
+    warn "Can't delete notes if there are none.." && exit 1;
+
+  # Using sed to delete the selected line
+  log "Deleting $1 note."
+  sed "${1}d" -i $NOTES_FILE
+}
+
+_help() {
+  echo "notes - POSIX compliant script to save some little useful notes"
+  echo "  -h, --help    : prints this message"
+  echo "  -l, --list    : lists all your notes"
+  echo "  -a, --add     : adds a new note"
+  echo "  -s, --show    : shows the specified note"
+  echo "  -d, --del     : deletes the specified note"
+  echo "  --delete-all  : deletes all your notes"
+}
+
+# If no argument is supplied then list all the notes
+[ $# -eq 0 ] && list;
+
+# Handling arguments
+set -- "$@"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -a) add "$2"; shift 2;;
+    -s) show "$2"; shift 2;;
+    -d) delete "$2"; shift 2;;
+
+    --add=*) add "${1#*=}"; shift 1;;
+    --show=*) show "${1#*=}"; shift 1;;
+    --del=*) delete "${1#*=}"; shift 1;;
+
+    -l|--list) list; shift 1;;
+    -h|--help) _help; shift 1;;
+    --delete-all) warn "Deleting all your notes."; rm -f $NOTES_FILE; exit 0;;
+
+    --add|--show|--del) warn "Argument '$1' requires a parameter."; exit 1;;
+    *) warn "Unknown argument '$1' given."; exit 1;;
+  esac
+done
+
+# Successfully exiting the script
+exit 0;
