@@ -82,7 +82,21 @@ usage() {
     -s, --stop : kills the current instance
     -h, --help : prints out this message
     -l, --list : lists all possible lofis
+    -m, --menu : use dialog to list all the lofis
 EOT
+}
+
+menu() {
+  local -a dialog_args
+
+  for index in ${!LOFI_INDEXES[@]}; do
+    dialog_args+=( "$index" ${LOFI_INDEXES[$index]} )
+  done
+
+  local track=$(dialog --output-fd 1 \
+    --menu "Lofis" $[LINES/3] $[COLUMNS/4] $[COLUMNS/4] ${dialog_args[@]})
+  clear
+  playLofi ${LOFI_INDEXES[$track]}
 }
 
 # If no arguments are supplied then play the classic lofi
@@ -101,6 +115,7 @@ while [ "$#" -gt 0 ]; do
     --stop|-s) stopLofi; shift 1;;
     --help|-h) usage; shift 1;;
     --list|-l) echo ${LOFI_INDEXES[@]}; shift 1;;
+    --menu|-m) menu; shift 1;;
 
     --play) warn "$1 requires an argument."; exit 1;;
     *) warn "Unknown arg"; exit 1;;
