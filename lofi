@@ -86,17 +86,27 @@ usage() {
 EOT
 }
 
+# -- FUNCTION --
+#
+#         NAME: menu
+#  DESCRIPTION: Cretes a tty interface using dialog (see man dialog.1)
 menu() {
   local -a dialog_args
 
+  # Loading the `dialog_args` array with this format:
+  # (index) (lofi_index) (index) (lofi_index)
   for index in ${!LOFI_INDEXES[@]}; do
-    dialog_args+=( "$index" ${LOFI_INDEXES[$index]} )
+    dialog_args+=( "$[index+1]" ${LOFI_INDEXES[$index]} )
   done
 
   local track=$(dialog --output-fd 1 \
     --menu "Lofis" $[LINES/3] $[COLUMNS/4] $[COLUMNS/4] ${dialog_args[@]})
   clear
-  playLofi ${LOFI_INDEXES[$track]}
+
+  # Checking if the user exited by pressing ESC or by selecting a track
+  [ ! $track ] && \
+    log "No lofi chosen." && exit 0 
+  playLofi ${LOFI_INDEXES[$[track-1]]}
 }
 
 # If no arguments are supplied then play the classic lofi
