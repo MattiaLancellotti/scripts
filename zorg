@@ -16,8 +16,8 @@ borg create --verbose --noatime \
   --progress --comment "$1" \
   --compression auto,zstd,15 \
   "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
-  /etc/portage/ /home/mattia/music /home/mattia/src /home/mattia/programming \
-  /home/mattia/pictures /var/lib/portage /usr/share/portage/config \
+  /etc/ ${HOME}/music ${HOME}/src ${HOME}/programming \
+  ${HOME}/pictures /var/lib/portage /usr/share/portage/config \
   --exclude-caches
 
 # Deleting old backups
