@@ -91,6 +91,13 @@ EOT
 #         NAME: menu
 #  DESCRIPTION: Cretes a tty interface using dialog (see man dialog.1)
 menu() {
+  # Checks for running instances and asks the user if the music is to be changed
+  # or not via a simple yes/no dialog.
+  [ -f $TMP_FILE ] && \
+    dialog --output-fd 1 \
+           --yesno "Would you like to kill the current instance?" 5 50 && \
+    stopLofi || clear && exit 0
+
   local -a dialog_args
 
   # Loading the `dialog_args` array with this format:
@@ -100,7 +107,7 @@ menu() {
   done
 
   local track=$(dialog --output-fd 1 \
-    --menu "Lofis" $[LINES/3] $[COLUMNS/4] $[COLUMNS/4] ${dialog_args[@]})
+                       --menu "Lofis" 20 50 3 ${dialog_args[@]})
   clear
 
   # Checking if the user exited by pressing ESC or by selecting a track
@@ -112,9 +119,7 @@ menu() {
 # If no arguments are supplied then play the classic lofi
 [ $# -eq 0 ] && playLofi "classic"
 
-#------------------------------------------------------------------------------
 # Parses the arguments passed to the script.
-#------------------------------------------------------------------------------
 set -- $@
 while [ "$#" -gt 0 ]; do
   case "$1" in
