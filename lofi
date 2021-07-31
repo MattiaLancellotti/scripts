@@ -44,10 +44,9 @@ log()  { echo "[@@] $1" >&1; }
 warn() { echo "[!!] $1" >&2; }
 
 # -- FUNCTION --
-#
-#         NAME: playLofi
-#  DESCRIPTION: Plays the given lofi.
-# PARAMENTER 1: The name of the lofi to play.
+#        NAME: playLofi
+# DESCRIPTION: Plays the given lofi.
+# PARAMETER 1: The name of the lofi to play.
 playLofi() {
   # Checking if the player is already in execution
   [ -f $TMP_FILE ] && \
@@ -87,7 +86,6 @@ EOT
 }
 
 # -- FUNCTION --
-#
 #         NAME: menu
 #  DESCRIPTION: Cretes a tty interface using dialog (see man dialog.1)
 menu() {
