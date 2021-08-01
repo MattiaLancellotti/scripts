@@ -25,10 +25,6 @@
 #     REVISION: 20/07/2021
 #==============================================================================
 
-# TODO:
-#   - trap to delete /tmp/pid_lofi if Ctrl-C is pressed during the execution of
-#     the play function.
-
 declare -a PLAYER_ARGS=( "--profile=live-audio" )
 declare -a LOFI_INDEXES=( "classic" "sleepy" "jazz" )
 declare -A LOFI_LINKS=( 
@@ -39,6 +35,9 @@ declare -A LOFI_LINKS=(
 
 # Place where the pid of the background-ed process is gonna end up
 TMP_FILE="/tmp/pid_lofi"
+
+# Executes stopLofi when the script is interrupted
+trap "stopLofi" SIGINT
 
 log()  { echo "[@@] $1" >&1; }
 warn() { echo "[!!] $1" >&2; }
@@ -92,9 +91,9 @@ menu() {
   # Checks for running instances and asks the user if the music is to be changed
   # or not via a simple yes/no dialog.
   [ -f $TMP_FILE ] && \
-    dialog --output-fd 1 \
+    (dialog --output-fd 1 \
            --yesno "Would you like to kill the current instance?" 5 50 && \
-    stopLofi || clear && exit 0
+           stopLofi || clear && exit 0)
 
   local -a dialog_args
 
