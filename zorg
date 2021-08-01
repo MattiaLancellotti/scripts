@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# TODO:
-#   - Signal trap (CTRL+C)
-
 # Backup device
 BORG_DEVICE="/dev/sda6"
 
