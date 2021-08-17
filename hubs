@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
-              | jq '.[] | .name ' \
-              | tr --delete \"))
+declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
+  | jq '.[] | .name ' \
+  | tr --delete \"))
 
 log()  { echo "[@@] $1" >&1; }
 warn() { echo "[!!] $1" >&2; }
