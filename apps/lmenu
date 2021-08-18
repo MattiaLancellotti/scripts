@@ -6,10 +6,11 @@ local menu = require('libs/menu')
 -- Checking if there is any valuable argument.
 -- If there is not the program exits with 1 (see man exit.1p)
 if #arg < 2 then
-   print('Use lmenu [arg0 arg1 [argn..]]')
+   print('Use lmenu msg [arg0 arg1 [argn..]]')
    os.exit(false)
 end
 
 -- Creating the menu and returning the choice
+print(table.remove(arg, 1))
 local choice = menu.createMenu(arg)
 os.exit(choice)
