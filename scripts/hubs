@@ -9,5 +9,5 @@ warn() { echo "[!!] $1" >&2; }
 
 log "Displaying all your repositories:"
 for value in ${REPO_LIST[@]}; do
-  echo -e "\t$value"
+  echo -e "  -> $value"
 done
