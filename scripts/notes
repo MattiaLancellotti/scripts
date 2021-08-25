@@ -64,6 +64,24 @@ show() {
   sed -n "${1}p" $NOTES_FILE
 }
 
+edit() {
+  [ ! -f $NOTES_FILE ] && \
+    warn "Your notes arent' here..." && exit 1;
+
+  [ ! $EDITOR ] && \
+    warn "There is no \$EDITOR set." && exit 1;
+
+  log "Opening the editor."
+  sed -n "${1}p" $NOTES_FILE >> /tmp/note_file
+
+  # Opening editor
+  $EDITOR /tmp/note_file
+
+  delete ${1}
+  add "$(cat /tmp/note_file)"
+  rm -r /tmp/note_file
+}
+
 # -- FUNCTION --
 #        NAME: delete
 # DESCRIPTION: Deletes the given note.
@@ -102,10 +120,12 @@ while [ "$#" -gt 0 ]; do
     -a) add "$2"; shift 2;;
     -s) show "$2"; shift 2;;
     -d) delete "$2"; shift 2;;
+    -e) edit "$2"; shift 2;;
 
     --add=*) add "${1#*=}"; shift 1;;
     --show=*) show "${1#*=}"; shift 1;;
     --del=*) delete "${1#*=}"; shift 1;;
+    --edit=*) edit "${1#*=}"; shift 1;;
 
     -l|--list) list; shift 1;;
     -h|--help) usage; shift 1;;
