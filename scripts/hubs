@@ -1,5 +1,6 @@
 #!/bin/bash
 
+HUBLINK=https://github.com/mattialancellotti
 declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
   | jq '.[] | .name ' \
   | tr --delete \"))
@@ -7,7 +8,7 @@ declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/r
 log()  { echo "[@@] $1" >&1; }
 warn() { echo "[!!] $1" >&2; }
 
-log "Displaying all your repositories:"
+log "Displaying all your repositories from $HUBLINK"
 for value in ${REPO_LIST[@]}; do
   echo -e "  -> $value"
 done
