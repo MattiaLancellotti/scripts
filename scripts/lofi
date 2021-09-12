@@ -2,10 +2,10 @@
 #
 #==============================================================================
 #
-#         FILE:  lofi (bash version)
+#         FILE: lofi (bash version)
 #
-#        USAGE:  lofi [-p <lofi type>|--play=<lofi type>] [-s|--stop]
-#                     [-l|--list] [-h|--help]
+#        USAGE: lofi [-p <lofi type>|--play=<lofi type>] [-s|--stop]
+#                    [-l|--list] [-h|--help]
 #
 #  DESCRIPTION: Plays different kinds of lofis in the background. The user can
 #               choose between: classic, sleepy or jazz. If no argument is
