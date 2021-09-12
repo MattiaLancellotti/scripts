@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Checking if the script was used the right way
+if [[ $# -ne 1 ]]; then
+  echo "Usage: mkscript <script name>";
+  exit 1;
+fi
+
+# Creating the name and checking if the script doesn't exist already
+SCRIPT_NAME=${HOME}/src/utilities/${1}
+if [[ -f $SCRIPT_NAME ]]; then
+  echo "${SCRIPT_NAME} already exists.";
+  exit 1;
+fi
+
+DATE=$(date +"%d/%m/%Y")
+echo "#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: ${1}
+#
+#        USAGE: TODO
+#
+#  DESCRIPTION: TODO
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: TODO
+#         BUGS: ---
+#        NOTES: TODO
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.0
+#      CREATED: ${DATE}
+#     REVISION: ---
+#==============================================================================
+" >> ${SCRIPT_NAME}
+
+chmod +x $SCRIPT_NAME
