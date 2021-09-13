@@ -37,3 +37,4 @@ echo "#!/bin/bash
 " >> ${SCRIPT_NAME}
 
 chmod +x $SCRIPT_NAME
+$EDITOR $SCRIPT_NAME
