@@ -106,6 +106,7 @@ usage() {
     -a, --add     : adds a new note
     -s, --show    : shows the specified note
     -d, --del     : deletes the specified note
+    -e, --edit    : edits a specific note
     --delete-all  : deletes all your notes
 EOT
 }
