@@ -66,7 +66,7 @@ function M.createMenu(list)
    -- Positioning the cursor
    print('\27['..(list_size-curr_pos)..'B')
 
-   return list[curr_pos+1]
+   return curr_pos+1
 end
 
 -- Checking if there is any valuable argument.
@@ -78,5 +78,4 @@ end
 
 -- Creating the menu and returning the choice
 print(table.remove(arg, 1))
-local choice = M.createMenu(arg)
-os.exit(choice)
+os.exit(M.createMenu(arg))
