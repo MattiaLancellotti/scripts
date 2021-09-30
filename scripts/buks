@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: buks
+#
+#        USAGE: TODO
+#
+#  DESCRIPTION: TODO
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: TODO
+#         BUGS: ---
+#        NOTES: TODO
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.0
+#      CREATED: 30/09/2021
+#     REVISION: ---
+#==============================================================================
+
+# Books will be stored in this directory
+BOOKS_DIR="${HOME}/books"
+
+log()  { echo "[@@] $1" >&1; }
+warn() { echo "[!!] $1" >&2; }
+
+# Checking if nnn is installed
+if ! command -v nnn &> /dev/null
+then
+  warn "You need nnn to use this program";
+  exit 1;
+fi
+
+# Checking if the directory exists
+[ ! -d $BOOKS_DIR ] && \
+  mkdir $BOOKS_DIR && warn "No books found." && exit 1;
+
+nnn $BOOKS_DIR;
+exit 0;
