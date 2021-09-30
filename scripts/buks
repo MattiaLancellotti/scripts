@@ -36,5 +36,6 @@ fi
 [ ! -d $BOOKS_DIR ] && \
   mkdir $BOOKS_DIR && warn "No books found." && exit 1;
 
+# Opening the explorer
 nnn $BOOKS_DIR;
 exit 0;

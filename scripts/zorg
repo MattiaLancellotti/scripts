@@ -13,8 +13,8 @@ borg create --verbose --noatime \
   --progress --comment "$1" \
   --compression auto,zstd,15 \
   "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
-  /etc/ ${HOME}/music ${HOME}/src ${HOME}/programming \
-  ${HOME}/pictures /var/lib/portage /proc/config.gz \
+  /etc/ ${HOME}/music ${HOME}/code ${HOME}/books ${HOME}/uniud ${HOME}/documents \
+  ${HOME}/pictures ${HOME}/.config /var/lib/portage /proc/config.gz \
   ${HOME}/.local/bin/dotfiles \
   --exclude-caches
 
