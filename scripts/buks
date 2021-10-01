@@ -30,11 +30,21 @@ if ! command -v nnn &> /dev/null
 then
   warn "You need nnn to use this program";
   exit 1;
+elif ! command -v zathura &> /dev/null
+then
+  warn "You need zathura to use this program";
+  exit 1;
 fi
 
 # Checking if the directory exists
 [ ! -d $BOOKS_DIR ] && \
   mkdir $BOOKS_DIR && warn "No books found." && exit 1;
+
+# Listing books
+IFS=$'\n'
+BUKS=($(ls -w 1 $BOOKS_DIR))
+
+[ ${#BUKS[@]} -eq 1 ] && zathura "$BOOKS_DIR/${BUKS[0]}" && exit 0;
 
 # Opening the explorer
 nnn $BOOKS_DIR;
