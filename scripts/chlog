@@ -23,8 +23,7 @@
 
 HEADER="CHANGELOG\n---------\n"
 
-log()  { echo "[@@] $1" >&1; }
-warn() { echo "[!!] $1" >&2; }
+source $DOTFILES/../include/logging.sh
 
 usage() {
   echo "chlog [ <changes> | --new-version, -n <version number> ]";

@@ -1,12 +1,11 @@
 #!/bin/bash
 
+source $DOTFILES/../include/logging.sh
+
 HUBLINK=https://github.com/mattialancellotti
 declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
   | jq '.[] | .name ' \
   | tr --delete \"))
-
-log()  { echo "[@@] $1" >&1; }
-warn() { echo "[!!] $1" >&2; }
 
 log "Displaying all your repositories from $HUBLINK"
 for value in ${REPO_LIST[@]}; do
