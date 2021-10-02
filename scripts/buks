@@ -21,20 +21,14 @@
 
 # Sourcing necessary files
 source $DOTFILES/../include/logging.sh
+source $DOTFILES/../include/system.sh
 
 # Books will be stored in this directory
 BOOKS_DIR="${HOME}/books"
 
 # Checking if nnn is installed
-if ! command -v nnn &> /dev/null
-then
-  warn "You need nnn to use this program";
-  exit 1;
-elif ! command -v zathura &> /dev/null
-then
-  warn "You need zathura to use this program";
-  exit 1;
-fi
+check_command nnn     || { warn "You need nnn to run the script"; exit 1; }
+check_command zathura || { warn "You need zathura to run the script"; exit 1; }
 
 # Checking if the directory exists
 [ ! -d $BOOKS_DIR ] && \
