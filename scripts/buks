@@ -27,8 +27,8 @@ source $DOTFILES/../include/system.sh
 BOOKS_DIR="${HOME}/books"
 
 # Checking if nnn is installed
-check_command nnn     || { warn "You need nnn to run the script"; exit 1; }
-check_command zathura || { warn "You need zathura to run the script"; exit 1; }
+check_command nnn     || die_on_error "You need nnn to run the script" 1;
+check_command zathura || die_on_error "You need zathura to run the script" 1;
 
 # Checking if the directory exists
 [ ! -d $BOOKS_DIR ] && \
