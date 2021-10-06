@@ -24,6 +24,7 @@
 HEADER="CHANGELOG\n---------\n"
 
 source $DOTFILES/../include/logging.sh
+source $DOTFILES/../include/system.sh
 
 usage() {
   echo "chlog [ <changes> | --new-version, -n <version number> ]";
@@ -41,7 +42,7 @@ if [[ "$1" == "--new-version" || "$1" == "-n" ]]; then
   echo -e "* Version $2:" >> CHANGELOG.md;
 else
   [ ! -f "CHANGELOG.md" ] &&
-    warn "You must use --new-version before adding changes" && exit 1;
+    die_on_error "You must use --new-version before adding changes" 1;
 
   echo -e "\t- $(date +%d%m%Y) $@" >> CHANGELOG.md;
 fi
