@@ -2,6 +2,11 @@
 
 source $DOTFILES/../include/logging.sh
 
+RED="\e[0;91m"
+GREEN="\e[0;92m"
+YELLOW="\e[0;33m"
+RESET="\e[0;0m"
+UNDERLINE="\e[4m"
 HUBLINK=https://github.com/mattialancellotti
 declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
   | jq '.[] | .name ' \
@@ -13,6 +18,6 @@ for repository in ${REPO_LIST[@]}; do
   LOCAL_REPO="$HOME/code/$repository"
 
   [ -d $LOCAL_REPO ] && \
-    echo "[✓] $repository synched in $LOCAL_REPO." || \
-    echo "[✗] $repository not synched."
+    echo -e "[$GREEN✓$RESET] $UNDERLINE$repository$RESET synched in $YELLOW$LOCAL_REPO$RESET." || \
+    echo -e "[$RED✗$RESET] $UNDERLINE$repository$RESET not synched."
 done
