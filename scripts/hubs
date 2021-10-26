@@ -8,6 +8,11 @@ declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/r
   | tr --delete \"))
 
 log "Displaying all your repositories from $HUBLINK"
-for value in ${REPO_LIST[@]}; do
-  echo -e "  -> $value"
+for repository in ${REPO_LIST[@]}; do
+  # Defining path of the local repository
+  LOCAL_REPO="$HOME/code/$repository"
+
+  [ -d $LOCAL_REPO ] && \
+    echo "[✓] $repository synched in $LOCAL_REPO." || \
+    echo "[✗] $repository not synched."
 done
