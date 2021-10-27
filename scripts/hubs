@@ -20,4 +20,4 @@ for repository in ${REPO_LIST[@]}; do
   [ -d $LOCAL_REPO ] && \
     echo -e "[$GREEN✓$RESET] $UNDERLINE$repository$RESET synched in $YELLOW$LOCAL_REPO$RESET." || \
     echo -e "[$RED✗$RESET] $UNDERLINE$repository$RESET not synched."
-done
+done | sort
