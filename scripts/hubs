@@ -2,11 +2,11 @@
 
 source $DOTFILES/../include/logging.sh
 
-RED="\e[0;91m"
-GREEN="\e[0;92m"
-YELLOW="\e[0;33m"
-RESET="\e[0;0m"
-UNDERLINE="\e[4m"
+R="\e[0;91m"
+Y="\e[0;93m"
+G="\e[0;92m"
+S="\e[0;0m"
+U="\e[4m"
 HUBLINK=https://github.com/mattialancellotti
 declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
   | jq '.[] | .name ' \
@@ -16,8 +16,14 @@ log "Displaying all your repositories from $HUBLINK"
 for repository in ${REPO_LIST[@]}; do
   # Defining path of the local repository
   LOCAL_REPO="$HOME/code/$repository"
+  SHORT_NAME=${repository%%-*}
 
-  [ -d $LOCAL_REPO ] && \
-    echo -e "[$GREEN✓$RESET] $UNDERLINE$repository$RESET synched in $YELLOW$LOCAL_REPO$RESET." || \
-    echo -e "[$RED✗$RESET] $UNDERLINE$repository$RESET not synched."
-done | sort
+  # Checking if the remote repository is present on the system
+  if [ -d $LOCAL_REPO ]; then
+    # Getting the last commit's relative date and printing it out
+    LAST_COMMIT=$(git -C $LOCAL_REPO log -1 --date=relative --format="%ah")
+    echo -e "[$G✓$S] $Y$SHORT_NAME$S synched.\t($U$LAST_COMMIT$S)"
+  else
+    echo -e "[$R✗$S] $U$SHORT_NAME$S not synched."
+  fi
+done | sort -r
