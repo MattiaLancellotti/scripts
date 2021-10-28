@@ -3,7 +3,7 @@
 # scripts directory to log messages to the console.
 
 # Normal log function to inform the user about stuff
-log()  { [ ${#*} -gt 0 ] && echo "[@@] $1";     }
+log()  { [ ${#*} -gt 0 ] && echo ":: $1";     }
 
 # Log function to warn the user about something
-warn() { [ ${#*} -gt 0 ] && echo "[!!] $1" >&2; }
+warn() { [ ${#*} -gt 0 ] && echo ":: $1" >&2; }
