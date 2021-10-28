@@ -20,8 +20,8 @@
 #==============================================================================
 
 # Sourcing necessary files
-source $DOTFILES/../include/logging.sh
-source $DOTFILES/../include/system.sh
+source $UTILITIES/include/logging.sh
+source $UTILITIES/include/system.sh
 
 # Books will be stored in this directory
 BOOKS_DIR="${HOME}/books"

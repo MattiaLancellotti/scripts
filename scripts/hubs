@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $DOTFILES/../include/logging.sh
+source $UTILITIES/include/logging.sh
 
 R="\e[0;91m"
 Y="\e[0;93m"

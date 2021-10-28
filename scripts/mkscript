@@ -7,7 +7,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 # Creating the name and checking if the script doesn't exist already
-SCRIPT_NAME=${HOME}/code/utilities/${1}
+SCRIPT_NAME=${HOME}/code/utilities/scripts/${1}
 if [[ -f $SCRIPT_NAME ]]; then
   echo "${SCRIPT_NAME} already exists.";
   exit 1;

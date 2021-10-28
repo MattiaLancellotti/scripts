@@ -25,6 +25,9 @@
 #     REVISION: 20/07/2021
 #==============================================================================
 
+source $UTILITIES/include/logging.sh
+source $UTILITIES/include/system.sh
+
 declare -a PLAYER_ARGS=( "--profile=live-audio" )
 declare -a LOFI_INDEXES=( "classic" "sleepy" "jazz" )
 declare -A LOFI_LINKS=( 
@@ -38,9 +41,6 @@ TMP_FILE="/tmp/pid_lofi"
 
 # Executes stopLofi when the script is interrupted
 trap "stopLofi" SIGINT
-
-log()  { echo "[@@] $1" >&1; }
-warn() { echo "[!!] $1" >&2; }
 
 # -- FUNCTION --
 #        NAME: playLofi

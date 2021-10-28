@@ -6,4 +6,4 @@
 log()  { [ ${#*} -gt 0 ] && echo ":: $1";     }
 
 # Log function to warn the user about something
-warn() { [ ${#*} -gt 0 ] && echo ":: $1" >&2; }
+warn() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
