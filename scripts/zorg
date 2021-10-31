@@ -1,5 +1,9 @@
 #!/bin/sh
 
+. $UTILITIES/include/system.sh
+
+check_command borg || die_on_error "You need borg to run this script." 1;
+
 # Backup device
 BORG_DEVICE="/dev/sda6"
 
