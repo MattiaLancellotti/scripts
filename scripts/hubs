@@ -1,6 +1,10 @@
 #!/bin/bash
 
+source $UTILITIES/include/system.sh
 source $UTILITIES/include/logging.sh
+
+check_command curl || die_on_error "You need curl to run this script" 1;
+check_command jq   || die_on_error "You need jq to run this script" 1;
 
 R="\e[0;91m"
 Y="\e[0;93m"
