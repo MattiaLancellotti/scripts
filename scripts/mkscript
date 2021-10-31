@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/bin/sh
 
 # Checking if the script was used the right way
-if [[ $# -ne 1 ]]; then
+if [ $# -ne 1 ]; then
   echo "Usage: mkscript <script name>";
   exit 1;
 fi
 
 # Creating the name and checking if the script doesn't exist already
 SCRIPT_NAME=${HOME}/code/utilities/scripts/${1}
-if [[ -f $SCRIPT_NAME ]]; then
+if [ -f $SCRIPT_NAME ]; then
   echo "${SCRIPT_NAME} already exists.";
   exit 1;
 fi
