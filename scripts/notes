@@ -22,6 +22,7 @@
 #     REVISION: 31/07/2021
 #==============================================================================
 
+# `source` breaks compatibility with sh
 . $UTILITIES/include/logging.sh
 
 # Notes' path
