@@ -7,3 +7,8 @@ log()  { [ ${#*} -gt 0 ] && echo ":: $1";     }
 
 # Log function to warn the user about something
 warn() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
+
+# This functions should be used when the script needs to print an error
+# message and die. It accepts as first parameter the exit message and the exit
+# code as the second one.
+die_on_error() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; exit $2; }

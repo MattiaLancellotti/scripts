@@ -24,7 +24,6 @@
 HEADER="CHANGELOG\n---------\n"
 
 source $UTILITIES/include/logging.sh
-source $UTILITIES/include/system.sh
 
 usage() {
   echo "chlog [ <changes> | --new-version, -n <version number> ]";
