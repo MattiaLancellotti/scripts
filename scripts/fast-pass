@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: fast-pass
+#
+#        USAGE: TODO
+#
+#  DESCRIPTION: TODO
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: TODO
+#         BUGS: ---
+#        NOTES: TODO
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.0
+#      CREATED: 01/11/2021
+#     REVISION: ---
+#==============================================================================
+
+. $UTILITIES/include/system.sh
+. $UTILITIES/include/logging.sh
+
+# This script needs gpg
+check_command gpg || die_on_error "You need gpg to encrypt your passwords." 1;
+
+# Creating a local database
+LOCAL_DB=${HOME}/.local/share/fast-pass/
+mkdir -p $LOCAL_DB
+
+# Listing all the passwords
+list() { ls $LOCAL_DB; }
+
+chck_passwd() {
+  # Checking if the given password exists
+  [ -f $LOCAL_DB$1 ] && exit 0;
+
+  exit 1;
+}
+
+create_passwd() {
+  # Asking the user to input the password
+  read -s passwd;
+  echo $passwd > /tmp/p
+  gpg --symmetric --no-symkey-cache -o $LOCAL_DB$1 /tmp/p
+}
+
+create_passwd ciao
+exit 0;
