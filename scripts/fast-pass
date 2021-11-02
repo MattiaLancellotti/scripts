@@ -19,18 +19,37 @@
 #     REVISION: ---
 #==============================================================================
 
-. $UTILITIES/include/system.sh
-. $UTILITIES/include/logging.sh
+source $UTILITIES/include/system.sh
+source $UTILITIES/include/logging.sh
 
 # This script needs gpg
 check_command gpg || die_on_error "You need gpg to encrypt your passwords." 1;
 
 # Creating a local database
-LOCAL_DB=${HOME}/.local/share/fast-pass/
-mkdir -p $LOCAL_DB
+PROG_FILES=${HOME}/.local/share/fast-pass
+LOCAL_DB="$PROG_FILES/passwords.tar"
+ENCRYPTED_DB="$LOCAL_DB.gpg"
+mkdir -p $PROG_FILES
 
+usage() {
+  log "fast-pass - simple bash script to store passwords."
+  cat <<- EOF
+  -h, --help : prints out this message.
+  -l, --list : lists all the stored passwords.
+  -n, --new  : stores a new password (via input).
+  -d, --del  : deletes a stored password.
+
+  Examples:
+    fast-pass [-l|--list]       : (Will list all the saved passwords)
+    fast-pass (-n|--new) <name> : (Will store the new password under <name>)
+    fast-pass <name>            : (If it exists ? show the password : create it)
+EOF
+}
 # Listing all the passwords
-list() { ls $LOCAL_DB; }
+# TODO:
+#   - Nice formatting of the passwords;
+#   - Maybe add the date it was added (creation date of the file)
+list_passwds() { ls $LOCAL_DB; }
 
 chck_passwd() {
   # Checking if the given password exists
@@ -41,10 +60,45 @@ chck_passwd() {
 
 create_passwd() {
   # Asking the user to input the password
+  log "Type the password you want so store:"
   read -s passwd;
-  echo $passwd > /tmp/p
-  gpg --symmetric --no-symkey-cache -o $LOCAL_DB$1 /tmp/p
+
+  local pfile_db="/tmp/$(echo $1 | sha256sum | awk '{print $1}')"
+  echo $passwd > $pfile_db
+
+  (
+  flock 10;
+  if [ ! -f $ENCRYPTED_DB ]; then
+    log "Creating the passwords database.";
+    tar -cvf $LOCAL_DB "$pfile_db";
+    gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
+  else
+    gpg --decrypt -o $LOCAL_DB $ENCRYPTED_DB;
+    tar -uf $LOCAL_DB $pfile_db;
+    gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
+  fi
+  ) 10<$pfile_db
+
+  shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
 }
 
-create_passwd ciao
+# If no arguments were supplied, than list all the saved passwords.
+[ $# -eq 0 ] && list_passwds
+
+# Parses the arguments passed to the script.
+set -- "$@"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -n) create_passwd $2; shift 2;;
+
+    --new=*) create_passwd ${1#*=}; shift 1;;
+
+    --del|-d) log "Coming soon"; shift 1;;
+    --list|-l) log "Coming soon"; shift 1;;
+
+    --help|-h) usage; exit 0;;
+    *) warn "Unknown argument $1"; exit 1;;
+  esac
+done
+
 exit 0;
