@@ -23,6 +23,7 @@
 #==============================================================================
 
 # `source` breaks compatibility with sh
+. $UTILITIES/include/system.sh
 . $UTILITIES/include/logging.sh
 
 # Notes' path
@@ -55,6 +56,10 @@ list() {
 # DESCRIPTION: Shows the notes that corresponds to the given number.
 # PARAMETER 1: The index of the note.
 show() {
+  # Checking if the user has supplied the necessary parameters to the script.
+  requires_parameters 1 $@ || die_on_error "Parameter required." 1;
+
+  # Checking if the file exists.
   [ ! -f $NOTES_FILE ] && \
     warn "Your notes aren't here..." && exit 1;
 
