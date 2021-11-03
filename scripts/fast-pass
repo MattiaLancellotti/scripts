@@ -19,6 +19,8 @@
 #     REVISION: ---
 #==============================================================================
 
+shopt -s extglob
+
 source $UTILITIES/include/system.sh
 source $UTILITIES/include/logging.sh
 
@@ -115,12 +117,9 @@ create_passwd() {
   local pfile_db="/tmp/$(echo $1 | sha256sum | awk '{print $1}')"
   echo $passwd > $pfile_db
 
-  (
-  flock 10;
   [ ! -f $ENCRYPTED_DB ] && \
     create_archive $(basename $pfile_db) || \
     update_archive $(basename $pfile_db);
-  ) 10<$pfile_db
 
   shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
 }
@@ -143,6 +142,7 @@ while [ $# -gt 0 ]; do
     --get|-g) log "Coming soon"; shift 1;;
     --delete-all) rm -rf $ENCRYPTED_DB; shift 1;;
 
+    @(-*)) warn "Unknown parameter $1."; exit 1;;
     *) chck_passwd $1; exit $?;;
   esac
 done
