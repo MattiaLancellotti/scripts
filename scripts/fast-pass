@@ -29,6 +29,7 @@ check_command gpg || die_on_error "You need gpg to encrypt your passwords." 1;
 PROG_FILES=${HOME}/.local/share/fast-pass
 LOCAL_DB="$PROG_FILES/passwords.tar"
 ENCRYPTED_DB="$LOCAL_DB.gpg"
+
 mkdir -p $PROG_FILES
 
 usage() {
@@ -38,6 +39,7 @@ usage() {
   -l, --list : lists all the stored passwords.
   -n, --new  : stores a new password (via input).
   -d, --del  : deletes a stored password.
+  --delete-all ! deletes all the passwords.
 
   Examples:
     fast-pass [-l|--list]       : (Will list all the saved passwords)
@@ -49,7 +51,17 @@ EOF
 # TODO:
 #   - Nice formatting of the passwords;
 #   - Maybe add the date it was added (creation date of the file)
-list_passwds() { ls $LOCAL_DB; }
+list_passwds() {
+  [ ! -f $ENCRYPTED_DB ] && \
+    log "No passwords saved." && exit 0;
+
+  # Decrypting and listing the content of the archive
+  gpg --decrypt --output $LOCAL_DB $ENCRYPTED_DB;
+  tar -tvf $LOCAL_DB;
+
+  # Removing the decrypted archive by shreding it
+  shred --remove=wipesync --zero --exact $LOCAL_DB;
+}
 
 chck_passwd() {
   # Checking if the given password exists
@@ -93,10 +105,11 @@ while [ $# -gt 0 ]; do
 
     --new=*) create_passwd ${1#*=}; shift 1;;
 
-    --del|-d) log "Coming soon"; shift 1;;
-    --list|-l) log "Coming soon"; shift 1;;
-
+    --list|-l) list_passwds; shift 1;;
     --help|-h) usage; exit 0;;
+
+    --del|-d) log "Coming soon"; shift 1;;
+    --delete-all) log "Coming soon"; shift 1;;
     *) warn "Unknown argument $1"; exit 1;;
   esac
 done
