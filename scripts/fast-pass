@@ -47,16 +47,20 @@ usage() {
     fast-pass <name>            : (If it exists ? show the password : create it)
 EOF
 }
+
 # Listing all the passwords
 # TODO:
 #   - Nice formatting of the passwords;
-#   - Maybe add the date it was added (creation date of the file)
+#   - Maybe add the date it was added (creation date of the file);
+#   - Check if the user entered the right password.
 list_passwds() {
   [ ! -f $ENCRYPTED_DB ] && \
     log "No passwords saved." && exit 0;
 
   # Decrypting and listing the content of the archive
   gpg --decrypt --output $LOCAL_DB $ENCRYPTED_DB;
+  [ $? -ne 0 ] && die_on_error "Wrong password." 1;
+
   tar -tvf $LOCAL_DB;
 
   # Removing the decrypted archive by shreding it
@@ -82,11 +86,11 @@ create_passwd() {
   flock 10;
   if [ ! -f $ENCRYPTED_DB ]; then
     log "Creating the passwords database.";
-    tar -cvf $LOCAL_DB "$pfile_db";
+    tar -C /tmp -cvf $LOCAL_DB "$(basename $pfile_db)";
     gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
   else
     gpg --decrypt -o $LOCAL_DB $ENCRYPTED_DB;
-    tar -uf $LOCAL_DB $pfile_db;
+    tar -C /tmp -uf $LOCAL_DB $(basename $pfile_db);
     gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
   fi
   ) 10<$pfile_db
