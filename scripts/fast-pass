@@ -58,7 +58,7 @@ list_passwds() {
     log "No passwords saved." && exit 0;
 
   # Decrypting and listing the content of the archive
-  gpg --decrypt --output $LOCAL_DB $ENCRYPTED_DB;
+  gpg --decrypt --no-symkey-cache --output $LOCAL_DB $ENCRYPTED_DB;
   [ $? -ne 0 ] && die_on_error "Wrong password." 1;
 
   tar -tvf $LOCAL_DB;
@@ -68,10 +68,24 @@ list_passwds() {
 }
 
 chck_passwd() {
-  # Checking if the given password exists
-  [ -f $LOCAL_DB$1 ] && exit 0;
+  [ ! -f $ENCRYPTED_DB ] && \
+    warn "No database found." && exit 1;
 
-  exit 1;
+  # Decrypting the database to check whether the given password is already
+  # stored.
+  gpg --decrypt --no-symkey-cache --output $LOCAL_DB $ENCRYPTED_DB;
+  [ $? -ne 0 ] && die_on_error "Wrong password." 1;
+
+  # Searching for the password.
+  local hash=$(echo $1 | sha256sum | awk '{print $1}')
+  local hashes=($(tar -tvf $LOCAL_DB | awk '{print $6}'))
+  for i in ${hashes[@]}; do
+    [[ "$i" == "$hash" ]] && exit 256;
+  done
+
+  # If the function gets here it means that the password name was not found. In
+  # this case it automatically gets created.
+  create_passwd $1;
 }
 
 create_passwd() {
@@ -89,7 +103,7 @@ create_passwd() {
     tar -C /tmp -cvf $LOCAL_DB "$(basename $pfile_db)";
     gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
   else
-    gpg --decrypt -o $LOCAL_DB $ENCRYPTED_DB;
+    gpg --decrypt --no-symkey-cache -o $LOCAL_DB $ENCRYPTED_DB;
     tar -C /tmp -uf $LOCAL_DB $(basename $pfile_db);
     gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
   fi
@@ -113,8 +127,10 @@ while [ $# -gt 0 ]; do
     --help|-h) usage; exit 0;;
 
     --del|-d) log "Coming soon"; shift 1;;
+    --get|-g) log "Coming soon"; shift 1;;
     --delete-all) log "Coming soon"; shift 1;;
-    *) warn "Unknown argument $1"; exit 1;;
+
+    *) chck_passwd $1; exit $?;;
   esac
 done
 
