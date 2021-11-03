@@ -69,7 +69,7 @@ list_passwds() {
 
 chck_passwd() {
   [ ! -f $ENCRYPTED_DB ] && \
-    warn "No database found." && exit 1;
+    create_passwd $1 && exit 0;
 
   # Decrypting the database to check whether the given password is already
   # stored.
@@ -88,6 +88,25 @@ chck_passwd() {
   create_passwd $1;
 }
 
+update_archive() {
+  # Checking if the encrypted database is available.
+  [ ! -f $ENCRYPTED_DB ] && die_on_error "No db found." 1;
+
+  # Updating and re-encrypting the archive.
+  tar -C /tmp -uf $LOCAL_DB $(basename $1);
+  gpg --symmetric --output $ENCRYPTED_DB $LOCAL_DB;
+}
+
+create_archive() {
+  # Checking if the encrypted database is available.
+  [ -f $ENCRYPTED_DB ] && die_on_error "Database found." 1;
+
+  # Creating the new archive and encrypting it.
+  log "Creating the passwords database.";
+  tar -C /tmp -cvf $LOCAL_DB "$(basename $1)";
+  gpg --symmetric --no-symkey-cache --output $ENCRYPTED_DB $LOCAL_DB;
+}
+
 create_passwd() {
   # Asking the user to input the password
   log "Type the password you want so store:"
@@ -98,15 +117,9 @@ create_passwd() {
 
   (
   flock 10;
-  if [ ! -f $ENCRYPTED_DB ]; then
-    log "Creating the passwords database.";
-    tar -C /tmp -cvf $LOCAL_DB "$(basename $pfile_db)";
-    gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
-  else
-    gpg --decrypt --no-symkey-cache -o $LOCAL_DB $ENCRYPTED_DB;
-    tar -C /tmp -uf $LOCAL_DB $(basename $pfile_db);
-    gpg --symmetric --no-symkey-cache -o $ENCRYPTED_DB $LOCAL_DB;
-  fi
+  [ ! -f $ENCRYPTED_DB ] && \
+    create_archive $(basename $pfile_db) || \
+    update_archive $(basename $pfile_db);
   ) 10<$pfile_db
 
   shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
@@ -119,16 +132,16 @@ create_passwd() {
 set -- "$@"
 while [ $# -gt 0 ]; do
   case "$1" in
-    -n) create_passwd $2; shift 2;;
+    -n) chck_passwd $2; shift 2;;
 
-    --new=*) create_passwd ${1#*=}; shift 1;;
+    --new=*) chck_passwd ${1#*=}; shift 1;;
 
     --list|-l) list_passwds; shift 1;;
     --help|-h) usage; exit 0;;
 
     --del|-d) log "Coming soon"; shift 1;;
     --get|-g) log "Coming soon"; shift 1;;
-    --delete-all) log "Coming soon"; shift 1;;
+    --delete-all) rm -rf $ENCRYPTED_DB; shift 1;;
 
     *) chck_passwd $1; exit $?;;
   esac
