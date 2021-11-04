@@ -88,8 +88,8 @@ chck_passwd() {
 }
 
 show_passwd() {
-  # Checking if the encrypted database is available.
-  [ ! -f $ENCRYPTED_DB ] && die_on_error "No db found." 1;
+  [ ! -f $ENCRYPTED_DB ] && \
+    log "No passwords saved." && exit 0;
 
   # Checking if the password is stored in the database.
   chck_passwd $1;
@@ -106,18 +106,11 @@ show_passwd() {
 }
 
 update_archive() {
-  # Checking if the encrypted database is available.
-  [ ! -f $ENCRYPTED_DB ] && die_on_error "No db found." 1;
-
-  # Updating and re-encrypting the archive.
   tar -C /tmp -uf $LOCAL_DB $(basename $1);
   gpg --symmetric --output $ENCRYPTED_DB $LOCAL_DB;
 }
 
 create_archive() {
-  # Checking if the encrypted database is available.
-  [ -f $ENCRYPTED_DB ] && die_on_error "Database found." 1;
-
   # Creating the new archive and encrypting it.
   log "Creating the passwords database.";
   tar -C /tmp -cvf $LOCAL_DB "$(basename $1)";
@@ -143,9 +136,6 @@ create_passwd() {
   shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
 }
 
-# If no arguments were supplied, than list all the saved passwords.
-[ $# -eq 0 ] && list_passwds
-
 # Parses the arguments passed to the script.
 set -- "$@"
 while [ $# -gt 0 ]; do
@@ -166,5 +156,8 @@ while [ $# -gt 0 ]; do
     *) show_passwd $1; exit 0;;
   esac
 done
+
+# If no arguments were supplied, than list all the saved passwords.
+[ ! -f $ENCRYPTED_DB ] && usage || list_passwds;
 
 exit 0;
