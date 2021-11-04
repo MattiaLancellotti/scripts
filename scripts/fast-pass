@@ -47,14 +47,11 @@ usage() {
   Examples:
     fast-pass [-l|--list]       : (Will list all the saved passwords)
     fast-pass (-n|--new) <name> : (Will store the new password under <name>)
-    fast-pass <name>            : (If it exists ? show the password : create it)
+    fast-pass <name>            : (Will show the password)
 EOF
 }
 
 # Listing all the passwords
-# TODO:
-#   - Nice formatting of the passwords;
-#   - Maybe add the date it was added (creation date of the file);
 list_passwds() {
   [ ! -f $ENCRYPTED_DB ] && \
     log "No passwords saved." && exit 0;
@@ -70,24 +67,42 @@ list_passwds() {
 }
 
 chck_passwd() {
-  [ ! -f $ENCRYPTED_DB ] && return 0;
-    #create_passwd $1 && exit 0;
+  [ ! -f $ENCRYPTED_DB ] && exit 1;
 
   # Decrypting the database to check whether the given password is already
   # stored.
   gpg --decrypt --no-symkey-cache --output $LOCAL_DB $ENCRYPTED_DB;
-  [ $? -ne 0 ] && die_on_error "Wrong password." 1;
+  [ $? -ne 0 ] && \
+    warn "Wrong password." && exit 2;
 
   # Searching for the password.
   local hash=$(echo $1 | sha256sum | awk '{print $1}')
   tar -tvf $LOCAL_DB | \
     awk -v hash="$hash" \
     '{
-      if ($6 == hash) exit 1;
-      else            exit 0;
+      if ($6 == hash) exit 0;
+      else            exit 1;
       }';
 
   return $?;
+}
+
+show_passwd() {
+  # Checking if the encrypted database is available.
+  [ ! -f $ENCRYPTED_DB ] && die_on_error "No db found." 1;
+
+  # Checking if the password is stored in the database.
+  chck_passwd $1;
+  case $? in
+    0)
+      local hash=$(echo $1 | sha256sum | awk '{print $1}');
+      tar -xOf $LOCAL_DB $hash;;
+    1) warn "Password not found in the database.";;
+    *) exit $?;;
+  esac
+
+  shred --remove=wipesync --zero --exact $LOCAL_DB;
+  exit $?;
 }
 
 update_archive() {
@@ -110,7 +125,9 @@ create_archive() {
 }
 
 create_passwd() {
-  ( chck_passwd $1 ) || die_on_error "Password already stored." 2;
+  ( chck_passwd $1 ) && \
+    shred --remove=wipesync --zero --exact $LOCAL_DB && \
+    die_on_error "Password already stored." 2;
 
   # Asking the user to input the password
   log "Type the password you want so store:"
@@ -134,18 +151,19 @@ set -- "$@"
 while [ $# -gt 0 ]; do
   case "$1" in
     -n) create_passwd $2; exit 0;;
+    -g) show_passwd $2; exit 0;;
 
     --new=*) create_passwd ${1#*=}; exit 0;;
+    --get=*) show_passwd ${1#*=}; exit 0;;
 
     --list|-l) list_passwds; shift 1;;
     --help|-h) usage; exit 0;;
 
     --del|-d) log "Coming soon"; shift 1;;
-    --get|-g) log "Coming soon"; shift 1;;
-    --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
 
+    --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
     @(-*)) warn "Unknown parameter $1."; exit 1;;
-    *) chck_passwd $1; exit $?;;
+    *) show_passwd $1; exit 0;;
   esac
 done
 
