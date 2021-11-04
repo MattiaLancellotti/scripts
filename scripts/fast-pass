@@ -136,15 +136,22 @@ create_passwd() {
   shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
 }
 
+# If no arguments were supplied, than list all the saved passwords.
+[ $# -eq 0 ] && usage;
+
 # Parses the arguments passed to the script.
 set -- "$@"
 while [ $# -gt 0 ]; do
   case "$1" in
-    -n) create_passwd $2; exit 0;;
-    -g) show_passwd $2; exit 0;;
+    -n)
+      [ ! -z $2 ] && create_passwd $2 || warn "$1: requires a parameter.";
+      exit 0;;
+    -g)
+      [ ! -z $2 ] && show_passwd $2 || warn "$1: requires a parameter.";
+      exit 0;;
 
-    --new=*) create_passwd ${1#*=}; exit 0;;
-    --get=*) show_passwd ${1#*=}; exit 0;;
+    --new=[:alnum:]) create_passwd ${1#*=}; exit 0;;
+    --get=[:alnum:]) show_passwd ${1#*=}; exit 0;;
 
     --list|-l) list_passwds; shift 1;;
     --help|-h) usage; exit 0;;
@@ -152,12 +159,11 @@ while [ $# -gt 0 ]; do
     --del|-d) log "Coming soon"; shift 1;;
 
     --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
+    @(-*=)) warn "$1: requires an argument."; exit 1;;
     @(-*)) warn "Unknown parameter $1."; exit 1;;
     *) show_passwd $1; exit 0;;
   esac
 done
 
-# If no arguments were supplied, than list all the saved passwords.
-[ ! -f $ENCRYPTED_DB ] && usage || list_passwds;
 
 exit 0;
