@@ -19,6 +19,7 @@
 #     REVISION: ---
 #==============================================================================
 
+# Activating extended pattern matching
 shopt -s extglob
 
 source $UTILITIES/include/system.sh
@@ -54,7 +55,6 @@ EOF
 # TODO:
 #   - Nice formatting of the passwords;
 #   - Maybe add the date it was added (creation date of the file);
-#   - Check if the user entered the right password.
 list_passwds() {
   [ ! -f $ENCRYPTED_DB ] && \
     log "No passwords saved." && exit 0;
@@ -63,15 +63,15 @@ list_passwds() {
   gpg --decrypt --no-symkey-cache --output $LOCAL_DB $ENCRYPTED_DB;
   [ $? -ne 0 ] && die_on_error "Wrong password." 1;
 
-  tar -tvf $LOCAL_DB;
+  tar -tvf $LOCAL_DB | awk '{print $6" (D"$4"T"$5")"}';
 
   # Removing the decrypted archive by shreding it
   shred --remove=wipesync --zero --exact $LOCAL_DB;
 }
 
 chck_passwd() {
-  [ ! -f $ENCRYPTED_DB ] && \
-    create_passwd $1 && exit 0;
+  [ ! -f $ENCRYPTED_DB ] && return 0;
+    #create_passwd $1 && exit 0;
 
   # Decrypting the database to check whether the given password is already
   # stored.
@@ -80,14 +80,14 @@ chck_passwd() {
 
   # Searching for the password.
   local hash=$(echo $1 | sha256sum | awk '{print $1}')
-  local hashes=($(tar -tvf $LOCAL_DB | awk '{print $6}'))
-  for i in ${hashes[@]}; do
-    [[ "$i" == "$hash" ]] && exit 256;
-  done
+  tar -tvf $LOCAL_DB | \
+    awk -v hash="$hash" \
+    '{
+      if ($6 == hash) exit 1;
+      else            exit 0;
+      }';
 
-  # If the function gets here it means that the password name was not found. In
-  # this case it automatically gets created.
-  create_passwd $1;
+  return $?;
 }
 
 update_archive() {
@@ -110,6 +110,8 @@ create_archive() {
 }
 
 create_passwd() {
+  ( chck_passwd $1 ) || die_on_error "Password already stored." 2;
+
   # Asking the user to input the password
   log "Type the password you want so store:"
   read -s passwd;
@@ -131,16 +133,16 @@ create_passwd() {
 set -- "$@"
 while [ $# -gt 0 ]; do
   case "$1" in
-    -n) chck_passwd $2; shift 2;;
+    -n) create_passwd $2; exit 0;;
 
-    --new=*) chck_passwd ${1#*=}; shift 1;;
+    --new=*) create_passwd ${1#*=}; exit 0;;
 
     --list|-l) list_passwds; shift 1;;
     --help|-h) usage; exit 0;;
 
     --del|-d) log "Coming soon"; shift 1;;
     --get|-g) log "Coming soon"; shift 1;;
-    --delete-all) rm -rf $ENCRYPTED_DB; shift 1;;
+    --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
 
     @(-*)) warn "Unknown parameter $1."; exit 1;;
     *) chck_passwd $1; exit $?;;
