@@ -4,14 +4,14 @@
 #
 #         FILE: fast-pass
 #
-#        USAGE: TODO
+#        USAGE: fast-pass [-l|-h|-n|-d] <name>
 #
 #  DESCRIPTION: TODO
 #
 #      OPTIONS: See usage function below.
-# REQUIREMENTS: TODO
+# REQUIREMENTS: gpg
 #         BUGS: ---
-#        NOTES: TODO
+#        NOTES: ---
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.0
@@ -194,6 +194,5 @@ while [ $# -gt 0 ]; do
     *) show_passwd $1; exit 0;;
   esac
 done
-
 
 exit 0;
