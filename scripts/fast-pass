@@ -71,33 +71,27 @@ chck_passwd() {
 
   # Decrypting the database to check whether the given password is already
   # stored.
-  gpg --decrypt --no-symkey-cache --output $LOCAL_DB $ENCRYPTED_DB;
+  gpg --decrypt --no-symkey-cache --quiet --output $LOCAL_DB $ENCRYPTED_DB;
   [ $? -ne 0 ] && \
     warn "Wrong password." && exit 2;
 
   # Searching for the password.
-  local hash=$(echo $1 | sha256sum | awk '{print $1}')
+  local hash=$(echo $1 | sha256sum | awk '{print $1}');
   tar -tvf $LOCAL_DB | \
-    awk -v hash="$hash" \
-    '{
-      if ($6 == hash) exit 0;
-      else            exit 1;
-      }';
+    gawk -v hash=$hash '{ if ($6 == hash) exit 1; }';
 
   return $?;
 }
 
 show_passwd() {
   [ ! -f $ENCRYPTED_DB ] && \
-    log "No passwords saved." && exit 0;
+    log "Looks kinda empty here." && exit 0;
 
   # Checking if the password is stored in the database.
   chck_passwd $1;
   case $? in
-    0)
-      local hash=$(echo $1 | sha256sum | awk '{print $1}');
-      tar -xOf $LOCAL_DB $hash;;
-    1) warn "Password not found in the database.";;
+    0) warn "Password not found in the database.";;
+    1) tar -xOf $LOCAL_DB $(echo $1 | sha256sum | awk '{print $1}');;
     *) exit $?;;
   esac
 
@@ -105,8 +99,27 @@ show_passwd() {
   exit $?;
 }
 
+delete_passwd() {
+  [ ! -f $ENCRYPTED_DB ] && \
+    log "Look kinda empty here." && exit 0;
+
+  chck_passwd $1;
+  case $? in
+    0) warn "Password not found in the database.";;
+    1) update_archive 0 $(echo $1 | sha256sum | awk '{print $1}');;
+    *) exit $?;;
+  esac
+
+  # Updating the encrypted archive
+  shred --remove=wipesync --zero --exact $LOCAL_DB;
+  exit $?;
+}
+
 update_archive() {
-  tar -C /tmp -uf $LOCAL_DB $(basename $1);
+  [ $1 == 0 ] &&
+    tar --delete -f $LOCAL_DB $2 || \
+    tar -C /tmp -uf $LOCAL_DB $(basename $2);
+
   gpg --symmetric --output $ENCRYPTED_DB $LOCAL_DB;
 }
 
@@ -122,6 +135,8 @@ create_passwd() {
     shred --remove=wipesync --zero --exact $LOCAL_DB && \
     die_on_error "Password already stored." 2;
 
+  [ $? -eq 2 ] && exit 2;
+
   # Asking the user to input the password
   log "Type the password you want so store:"
   read -s passwd;
@@ -130,8 +145,8 @@ create_passwd() {
   echo $passwd > $pfile_db
 
   [ ! -f $ENCRYPTED_DB ] && \
-    create_archive $(basename $pfile_db) || \
-    update_archive $(basename $pfile_db);
+    create_archive   $(basename $pfile_db) || \
+    update_archive 1 $(basename $pfile_db);
 
   shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
 }
@@ -147,18 +162,21 @@ while [ $# -gt 0 ]; do
       [ ! -z $2 ] && create_passwd $2 || warn "$1: requires a parameter.";
       exit 0;;
     -g)
-      [ ! -z $2 ] && show_passwd $2 || warn "$1: requires a parameter.";
+      [ ! -z $2 ] && show_passwd   $2 || warn "$1: requires a parameter.";
+      exit 0;;
+    -d)
+      [ ! -z $2 ] && delete_passwd $2 || warn "$1: requires a parameter.";
       exit 0;;
 
     --new=[:alnum:]) create_passwd ${1#*=}; exit 0;;
     --get=[:alnum:]) show_passwd ${1#*=}; exit 0;;
+    --del=[:alnum:]) delete_passwd ${1#*=}; exit 0;;
 
-    --list|-l) list_passwds; shift 1;;
+    --list|-l) list_passwds; exit 0;;
     --help|-h) usage; exit 0;;
 
-    --del|-d) log "Coming soon"; shift 1;;
-
     --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
+
     @(-*=)) warn "$1: requires an argument."; exit 1;;
     @(-*)) warn "Unknown parameter $1."; exit 1;;
     *) show_passwd $1; exit 0;;
