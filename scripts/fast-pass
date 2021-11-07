@@ -131,24 +131,26 @@ create_archive() {
 }
 
 create_passwd() {
-  ( chck_passwd $1 ) && \
-    shred --remove=wipesync --zero --exact $LOCAL_DB && \
-    die_on_error "Password already stored." 2;
+  chck_passwd $1;
 
-  [ $? -eq 2 ] && exit 2;
+  case $? in
+    0)
+      log "Type the password you want to store: ";
+      read -s passwd;
 
-  # Asking the user to input the password
-  log "Type the password you want so store:"
-  read -s passwd;
+      local pfile_db="/tmp/$(echo $1 | sha256sum | awk '{print $1}')"
+      echo $passwd > $pfile_db
 
-  local pfile_db="/tmp/$(echo $1 | sha256sum | awk '{print $1}')"
-  echo $passwd > $pfile_db
+      [ ! -f $ENCRYPTED_DB ] && \
+        create_archive   $(basename $pfile_db) || \
+        update_archive 1 $(basename $pfile_db);;
 
-  [ ! -f $ENCRYPTED_DB ] && \
-    create_archive   $(basename $pfile_db) || \
-    update_archive 1 $(basename $pfile_db);
+    1) warn "Password already stored.";;
+    *) exit $?;;
+  esac
 
   shred --remove=wipesync --zero --exact $pfile_db $LOCAL_DB;
+  exit $?;
 }
 
 # If no arguments were supplied, than list all the saved passwords.
@@ -157,7 +159,11 @@ create_passwd() {
 # Parses the arguments passed to the script.
 set -- "$@"
 while [ $# -gt 0 ]; do
+
+  # All the pattern-matching below is safe so that the script won't break if the
+  # user isn't smart.
   case "$1" in
+    # -z checks if the given string is null (the user didn't supply the name)
     -n)
       [ ! -z $2 ] && create_passwd $2 || warn "$1: requires a parameter.";
       exit 0;;
@@ -168,15 +174,21 @@ while [ $# -gt 0 ]; do
       [ ! -z $2 ] && delete_passwd $2 || warn "$1: requires a parameter.";
       exit 0;;
 
-    --new=[:alnum:]) create_passwd ${1#*=}; exit 0;;
-    --get=[:alnum:]) show_passwd ${1#*=}; exit 0;;
-    --del=[:alnum:]) delete_passwd ${1#*=}; exit 0;;
+    # Previously this was checking only --new=*), but * also implies a null
+    # string so '--new=' could be used and it would break the script. To avoid
+    # this inconvenient I'm using bash's extended pattern matching
+    # (shopt extglob) !() that translates to "match everything except a null
+    # string".
+    --new=!()) create_passwd ${1#*=}; exit 0;;
+    --get=!()) show_passwd ${1#*=}; exit 0;;
+    --del=!()) delete_passwd ${1#*=}; exit 0;;
 
     --list|-l) list_passwds; exit 0;;
     --help|-h) usage; exit 0;;
 
     --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
 
+    # Matching one of the given patterns
     @(-*=)) warn "$1: requires an argument."; exit 1;;
     @(-*)) warn "Unknown parameter $1."; exit 1;;
     *) show_passwd $1; exit 0;;
