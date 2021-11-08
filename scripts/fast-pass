@@ -11,12 +11,15 @@
 #      OPTIONS: See usage function below.
 # REQUIREMENTS: gpg
 #         BUGS: ---
-#        NOTES: ---
+#        NOTES: As for now this simple password manager is using gpg with a
+#               secret password. Hopefully the next update will enforce the use
+#               of e gpg key so that the user won't be force into typing the
+#               password.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.0
 #      CREATED: 01/11/2021
-#     REVISION: ---
+#     REVISION: 08/11/2021
 #==============================================================================
 
 # Activating extended pattern matching
