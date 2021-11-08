@@ -60,7 +60,7 @@ list_passwds() {
     log "No passwords saved." && exit 0;
 
   # Decrypting and listing the content of the archive
-  gpg --decrypt --no-symkey-cache --output $LOCAL_DB $ENCRYPTED_DB;
+  gpg --decrypt --quiet --output $LOCAL_DB $ENCRYPTED_DB;
   [ $? -ne 0 ] && die_on_error "Wrong password." 1;
 
   tar -tvf $LOCAL_DB | awk '{print $6" (D"$4"T"$5")"}';
@@ -70,11 +70,11 @@ list_passwds() {
 }
 
 chck_passwd() {
-  [ ! -f $ENCRYPTED_DB ] && exit 1;
+  [ ! -f $ENCRYPTED_DB ] && return 0;
 
   # Decrypting the database to check whether the given password is already
   # stored.
-  gpg --decrypt --no-symkey-cache --quiet --output $LOCAL_DB $ENCRYPTED_DB;
+  gpg --decrypt --quiet --output $LOCAL_DB $ENCRYPTED_DB;
   [ $? -ne 0 ] && \
     warn "Wrong password." && exit 2;
 
@@ -123,14 +123,14 @@ update_archive() {
     tar --delete -f $LOCAL_DB $2 || \
     tar -C /tmp -uf $LOCAL_DB $(basename $2);
 
-  gpg --symmetric --output $ENCRYPTED_DB $LOCAL_DB;
+  gpg --encrypt --quiet --output $ENCRYPTED_DB $LOCAL_DB;
 }
 
 create_archive() {
   # Creating the new archive and encrypting it.
   log "Creating the passwords database.";
   tar -C /tmp -cvf $LOCAL_DB "$(basename $1)";
-  gpg --symmetric --no-symkey-cache --output $ENCRYPTED_DB $LOCAL_DB;
+  gpg --encrypt --output $ENCRYPTED_DB $LOCAL_DB;
 }
 
 create_passwd() {
