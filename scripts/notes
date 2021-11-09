@@ -51,6 +51,7 @@ add() {
 # -- FUNCTION --
 #        NAME: list
 # DESCRIPTION: Shows all the notes to the user.
+# PARAMETER @: Files to be shown.
 list() {
   local sections="$(ls $NOTES_PATH)";
 
@@ -64,6 +65,7 @@ list() {
   # To avoid ifs and stuff, I'm using positional parameters.
   [ $# -gt 0 ] && set -- "$@" || set -- "$sections";
 
+  # Show every single file listed as positional parameters.
   for sec in $@; do
     [ -f $NOTES_PATH/$sec ] && \
       log  "Notes from $sec:" && cat -n $NOTES_PATH/$sec || \
@@ -130,7 +132,7 @@ while [ "$#" -gt 0 ]; do
       exit 0;;
     -s)
       [ ! -z $2 ] && SECTION=$2 || warn "$1: requires a parameter.";
-      exit 0;;
+      shift 2;;
     -d)
       [ ! -z $2 ] && delete $2 || warn "$1: requires a parameter.";
       exit 0;;
@@ -138,13 +140,13 @@ while [ "$#" -gt 0 ]; do
       [ ! -z $2 ] && edit $2 || warn "$1: requires a parameter.";
       exit 0;;
 
-    --add=!()) add "${1#*=}"; shift 1;;
-    --section=!()) SECITON="${1#*=}"; shift 1;;
-    --del=!()) delete "${1#*=}"; shift 1;;
-    --edit=!()) edit "${1#*=}"; shift 1;;
+    --add=!()) add "${1#*=}"; exit 0;;
+    --section=!()) SECTION="${1#*=}"; shift 1;;
+    --del=!()) delete "${1#*=}"; exit 0;;
+    --edit=!()) edit "${1#*=}"; exit 0;;
 
-    -l|--list) list; shift 1;;
-    -h|--help) usage; shift 1;;
+    -l|--list) list; exit 0;;
+    -h|--help) usage; exit 0;;
     --delete-all) warn "Deleting all your notes."; rm -f $NOTES_FILE; exit 0;;
 
     @(-*=)) warn "$1: requires an argument."; exit 1;;
