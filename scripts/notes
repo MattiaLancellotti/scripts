@@ -14,7 +14,9 @@
 #      OPTIONS: See usage function below.
 # REQUIREMENTS: basic busybox utilities
 #         BUGS: ---
-#        NOTES: ---
+#        NOTES: This is a branch for testing a new form of notes. Basically
+#               instead of having all the notes in a single file, multiple files
+#               are going to be created and each of them rapresents a section.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.0
@@ -27,45 +29,43 @@
 . $UTILITIES/include/logging.sh
 
 # Notes' path
-NOTES_FILE=~/.notelist
-N_NOTES=$(wc -l $NOTES_FILE | awk '{print $1}')
+NOTES_PATH=~/.local/share/notes
+mkdir -p $NOTES_PATH
+
+# Specified section
+SECTION=mix
 
 # -- FUNCTION --
 #        NAME: add
 # DESCRIPTION: Adds the given note to the list.
 # PARAMETER 1: The notes that the user wants to add.
 add() {
-  log "Updating the notes file."
+  log "Updating note file: $SECTION."
 
   # Updating the file
-  echo "$1" >> $NOTES_FILE
+  echo "$1" >> $NOTES_PATH/$SECTION
 }
 
 # -- FUNCTION --
 #        NAME: list
 # DESCRIPTION: Shows all the notes to the user.
 list() {
+  local sections="$(ls $NOTES_PATH)";
+
   # Checking if the file still exists
-  [ -s $NOTES_FILE ] && \
-    log "Showing your list of notes." && cat -n $NOTES_FILE || \
-    log "No notes to show." && exit 1;
-}
+  [ -z "$sections" ] && \
+    log "Seems kinda empty in here...." && \
+    log "Try with notes --add=<text>"   && exit 1;
 
-# -- FUNCTION --
-#        NAME: show
-# DESCRIPTION: Shows the notes that corresponds to the given number.
-# PARAMETER 1: The index of the note.
-show() {
-  # Checking if the user has supplied the necessary parameters to the script.
-  requires_parameters 1 $@ || die_on_error "Parameter required." 1;
+  # If some arguments were supplied to the function they are going to be
+  # interpreted as section names.
+  [ $# -gt 0 ] && set -- "$@" || set -- "$sections";
 
-  # Checking if the file exists.
-  [ ! -f $NOTES_FILE ] && \
-    warn "Your notes aren't here..." && exit 1;
-
-  # Deleting using sed
-  log "Showing $1 note."
-  sed -n "${1}p" $NOTES_FILE
+  for sec in $@; do
+    [ -f $NOTES_PATH/$sec ] && \
+      log  "Notes from $sec:" && cat -n $NOTES_PATH/$sec || \
+      warn "No notes in $sec.";
+  done
 }
 
 edit() {
@@ -108,7 +108,7 @@ usage() {
     -h, --help    : prints this message
     -l, --list    : lists all your notes
     -a, --add     : adds a new note
-    -s, --show    : shows the specified note
+    -s, --section : shows the specified note
     -d, --del     : deletes the specified note
     -e, --edit    : edits a specific note
     --delete-all  : deletes all your notes
@@ -123,7 +123,7 @@ set -- "$@"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -a) add "$2"; shift 2;;
-    -s) show "$2"; shift 2;;
+    -s) SECTION="$2"; shift 2;;
     -d) delete "$2"; shift 2;;
     -e) edit "$2"; shift 2;;
 
