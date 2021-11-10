@@ -114,6 +114,8 @@ delete() {
   # Checking if the section is empty
   [ -z "$(cat $NOTES_PATH/$SECTION)" ] && \
     rm -v $NOTES_PATH/$SECTION;
+
+  return 0;
 }
 
 # -- FUNCTION --
