@@ -74,21 +74,25 @@ list() {
 }
 
 edit() {
-  [ ! -f $NOTES_FILE ] && \
-    warn "Your notes arent' here..." && exit 1;
+  local sections="$(ls $NOTES_PATH)";
+
+  # Checking if the file still exists
+  [ -z "$sections" ] && \
+    log "Seems kinda empty in here...." && \
+    log "Try with notes --add=<text>"   && exit 0;
 
   [ ! $EDITOR ] && \
     warn "There is no \$EDITOR set." && exit 1;
 
-  log "Opening the editor."
-  sed -n "${1}p" $NOTES_FILE >> /tmp/note_file
+  log "Opening the editor.";
+  sed -n "${1}p" $NOTES_PATH/$SECTION >> /tmp/note_file;
 
   # Opening editor
-  $EDITOR /tmp/note_file
+  $EDITOR /tmp/note_file;
 
-  delete ${1}
-  add "$(cat /tmp/note_file)"
-  rm -r /tmp/note_file
+  delete ${1};
+  add "$(cat /tmp/note_file)";
+  rm -r /tmp/note_file;
 }
 
 # -- FUNCTION --
@@ -96,12 +100,20 @@ edit() {
 # DESCRIPTION: Deletes the given note.
 # PARAMETER 1: The index of the note.
 delete() {
-  [ ! -s $NOTES_FILE ] && \
-    warn "Can't delete notes if there are none.." && exit 1;
+  local sections="$(ls $NOTES_PATH)";
+
+  # Checking if the file still exists
+  [ -z "$sections" ] && \
+    log "Seems kinda empty in here...." && \
+    log "Try with notes --add=<text>"   && exit 0;
 
   # Using sed to delete the selected line
-  log "Deleting $1 note."
-  sed "${1}d" -i $NOTES_FILE
+  log "Deleting $1 note.";
+  sed "${1}d" -i $NOTES_PATH/$SECTION;
+
+  # Checking if the section is empty
+  [ -z "$(cat $NOTES_PATH/$SECTION)" ] && \
+    rm -v $NOTES_PATH/$SECTION;
 }
 
 # -- FUNCTION --
