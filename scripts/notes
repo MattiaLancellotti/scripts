@@ -84,7 +84,10 @@ edit() {
   [ ! $EDITOR ] && \
     warn "There is no \$EDITOR set." && exit 1;
 
-  log "Opening the editor.";
+  [ ! -f $NOTES_PATH/$SECTION ] && \
+    log "Have to specify a section." && exit 1;
+
+  log "Editing note $1 from $SECTION.";
   sed -n "${1}p" $NOTES_PATH/$SECTION >> /tmp/note_file;
 
   # Opening editor
@@ -105,10 +108,13 @@ delete() {
   # Checking if the file still exists
   [ -z "$sections" ] && \
     log "Seems kinda empty in here...." && \
-    log "Try with notes --add=<text>"   && exit 0;
+    log "Try with notes --add=<text>"   && exit 1;
+
+  [ ! -f $NOTES_PATH/$SECTION ] && \
+    log "Have to specify a section." && exit 1;
 
   # Using sed to delete the selected line
-  log "Deleting $1 note.";
+  log "Deleting note $1 from $SECTION.";
   sed "${1}d" -i $NOTES_PATH/$SECTION;
 
   # Checking if the section is empty
