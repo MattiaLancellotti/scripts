@@ -148,16 +148,16 @@ set -- "$@"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -a)
-      [ ! -z $2 ] && add $2 || warn "$1: requires a parameter.";
+      [ ! -z "$2" ] && add "$2" || warn "$1: requires a parameter.";
       exit 0;;
     -s)
-      [ ! -z $2 ] && SECTION=$2 || warn "$1: requires a parameter.";
+      [ ! -z "$2" ] && SECTION=$2 || warn "$1: requires a parameter.";
       shift 2;;
     -d)
-      [ ! -z $2 ] && delete $2 || warn "$1: requires a parameter.";
+      [ ! -z "$2" ] && delete "$2" || warn "$1: requires a parameter.";
       exit 0;;
     -e)
-      [ ! -z $2 ] && edit $2 || warn "$1: requires a parameter.";
+      [ ! -z "$2" ] && edit "$2" || warn "$1: requires a parameter.";
       exit 0;;
 
     --add=!()) add "${1#*=}"; exit 0;;
