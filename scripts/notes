@@ -26,9 +26,8 @@
 
 shopt -s extglob
 
-# `source` breaks compatibility with sh
-. $UTILITIES/include/system.sh
-. $UTILITIES/include/logging.sh
+source $UTILITIES/include/system.sh
+source $UTILITIES/include/logging.sh
 
 # Notes' path
 NOTES_PATH=~/.local/share/notes
