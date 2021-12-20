@@ -123,7 +123,7 @@ do
   case "$1" in
     -p) playLofi "$2"; shift 2;;
 
-    --play=) playLofi "${1#*=}"; shift 1;;
+    --play=*) playLofi "${1#*=}"; shift 1;;
 
     --stop|-s) stopLofi; shift 1;;
     --help|-h) usage; shift 1;;
