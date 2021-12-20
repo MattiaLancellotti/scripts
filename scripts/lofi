@@ -90,27 +90,27 @@ EOT
 menu() {
   # Checks for running instances and asks the user if the music is to be changed
   # or not via a simple yes/no dialog.
-  [ -f $TMP_FILE ] && \
-    (dialog --output-fd 1 \
-           --yesno "Would you like to kill the current instance?" 5 50 && \
-           stopLofi || clear && exit 0)
+  if [ -f $TMP_FILE ];
+  then
+    echo "Another instance of lofi is already running.";
+    echo "Do you want to kill it?";
 
-  local -a dialog_args
+    read answer;
+    case "$answer" in
+      N|No|Nope) return 0;;
+      *) stopLofi;;
+    esac
+  fi
 
-  # Loading the `dialog_args` array with this format:
-  # (index) (lofi_index) (index) (lofi_index)
-  for index in ${!LOFI_INDEXES[@]}; do
-    dialog_args+=( "$[index+1]" ${LOFI_INDEXES[$index]} )
+  PS3="Select a track: ";
+  select lofi in ${LOFI_INDEXES[@]} None;
+  do
+    [[ "$lofi" == "None" ]] \
+      && echo "No track selected." \
+      || playLofi "$lofi";
+
+    return 0;
   done
-
-  local track=$(dialog --output-fd 1 \
-                       --menu "Lofis" 20 50 3 ${dialog_args[@]})
-  clear
-
-  # Checking if the user exited by pressing ESC or by selecting a track
-  [ ! $track ] && \
-    log "No lofi chosen." && exit 0 
-  playLofi ${LOFI_INDEXES[$[track-1]]}
 }
 
 # If no arguments are supplied then play the classic lofi
@@ -118,11 +118,12 @@ menu() {
 
 # Parses the arguments passed to the script.
 set -- $@
-while [ "$#" -gt 0 ]; do
+while [ "$#" -gt 0 ];
+do
   case "$1" in
     -p) playLofi "$2"; shift 2;;
 
-    --play=*) playLofi "${1#*=}"; shift 1;;
+    --play=) playLofi "${1#*=}"; shift 1;;
 
     --stop|-s) stopLofi; shift 1;;
     --help|-h) usage; shift 1;;
