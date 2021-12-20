@@ -5,7 +5,7 @@
 #         FILE: lofi (bash version)
 #
 #        USAGE: lofi [-p <lofi type>|--play=<lofi type>] [-s|--stop]
-#                    [-l|--list] [-h|--help]
+#                    [-l|--list] [-h|--help] [-m|--menu]
 #
 #  DESCRIPTION: Plays different kinds of lofis in the background. The user can
 #               choose between: classic, sleepy or jazz. If no argument is
@@ -22,7 +22,7 @@
 #      COMPANY: ---
 #      VERSION: 1.1
 #      CREATED: 10/07/2021
-#     REVISION: 20/07/2021
+#     REVISION: 20/12/2021
 #==============================================================================
 
 source $UTILITIES/include/logging.sh
