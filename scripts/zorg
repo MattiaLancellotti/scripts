@@ -32,3 +32,6 @@ echo "Deleting old backups."
 borg prune --verbose --list \
   --prefix="{user}-" --keep-within=10d --keep-weekly=4 --keep-monthly=1 \
   "${MOUNT_POINT}/backups"
+
+echo "Deleting exported keys"
+[ -f $KEYS_EXPORT ] && rm -v $KEYS_EXPORT
