@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: cottage
+#
+#        USAGE: TODO
+#
+#  DESCRIPTION: TODO
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: TODO
+#         BUGS: ---
+#        NOTES: TODO
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.0
+#      CREATED: 27/12/2021
+#     REVISION: ---
+#==============================================================================
+
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Reporting messages to the user
+# PARAMETER 1: The message to report.
+log() { [ ${#*} -gt 0 ] && echo ":: $1" >&1; }
+err() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
+
+# This is the world set where all the packages installed by the user are stored.
+WORLD_SET="/var/lib/portage/world";
+if [ ! -f "${WORLD_SET}" ]; then
+  err "Portage's world set ${WORLD_SET} is not present.";
+  exit 1;
+fi
+
+# The packages added to this file will actually be deleted.
+# Be carefull with the packages you add.
+UNINSTALL="/tmp/radioactive_wastes";
+
+# The packages added to this file only needs to be deselected and removed from
+# the main set. This was intended to store libraries and other packages needed
+# by some program whose presence in the set might create problems when updating
+# portage.
+DESELECT="/tmp/recycle";
+
+# Reads all the entries in world, then checks whether they are needed by some
+# other programs. If not it is going to report it to the user.
+while read -r pkg; do
+  # Using equery to check dependencies.
+  if [ -z "$(equery --quiet depends $pkg)" ]; then
+    # Asking the user what to do next.
+    read -p "[~] Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
+    if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
+      echo "Deleting $pkg.";
+      echo "$pkg" >> $UNINSTALL;
+    fi
+  else
+    read -p "[~] Do you want to deselect $pkg? [y/N] " answer < /dev/stdout;
+    if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
+      echo "Deselecting $pkg.";
+      echo "$pkg" >> $DESELECT;
+    fi
+  fi
+done < "/var/lib/portage/world";
+
+if [ ! -s $UNINSTALL ] && [ ! -s $DESELECT ]; then
+  log "No packages selected to either be deleted or deselected. Exiting.."
+  exit 0;
+fi
+
+if [ -s $UNINSTALL ] || [ -s $DESELECT ]; then
+  # Cleaning portage's tree
+  doas emerge --deselect $(cat $UNINSTALL);
+  if [ -s $UNISNTALL ]; then
+    doas emerge --ask --depclean;
+  fi
+fi
+
+rm -f $UNINSTALL $DESELECT;
