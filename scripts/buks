@@ -11,34 +11,57 @@
 #      OPTIONS: See usage function below.
 # REQUIREMENTS: TODO
 #         BUGS: ---
-#        NOTES: TODO
+#        NOTES: ---
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.0
 #      CREATED: 30/09/2021
-#     REVISION: ---
+#     REVISION: 02/01/2022
 #==============================================================================
 
-# Sourcing necessary files
-source $UTILITIES/include/logging.sh
-source $UTILITIES/include/system.sh
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Report messages.
+# PARAMETER 1: Message to report.
+log() { [ ${#*} -gt 0 ] && echo ":: $1" >&1; }
+err() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
+
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a program is available through a built-in.
+# PARAMETER 1: Program needed.
+check_command() { command -v "$1" 1> /dev/null; }
 
 # Books will be stored in this directory
 BOOKS_DIR="${HOME}/books"
 
 # Checking if nnn is installed
-check_command nnn     || die_on_error "You need nnn to run the script" 1;
-check_command zathura || die_on_error "You need zathura to run the script" 1;
+check_command nnn || { 
+  err "You need nnn to run the script";
+  exit 1;
+}
 
-# Checking if the directory exists
-[ ! -d $BOOKS_DIR ] && \
-  mkdir $BOOKS_DIR && warn "No books found." && exit 1;
+check_command zathura || {
+  warn "You need zathura to run the script";
+  exit 1;
+}
+
+# Checking if the directory exists.
+# If it does not, then warn the user and exit successfully.
+if [ ! -d $BOOKS_DIR ]; then
+  mkdir $BOOKS_DIR;
+  err "No books found.";
+  exit 0;
+fi
 
 # Listing books
 IFS=$'\n'
 BUKS=($(ls -w 1 $BOOKS_DIR))
 
-[ ${#BUKS[@]} -eq 1 ] && zathura "$BOOKS_DIR/${BUKS[0]}" && exit 0;
+if [ ${#BUKS[@]} -eq 1 ]; then
+  zathura "$BOOKS_DIR/${BUKS[0]}";
+  exit 0;
+fi
 
 # Opening the explorer
 nnn $BOOKS_DIR;
