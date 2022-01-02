@@ -4,12 +4,12 @@
 #
 #         FILE: buks
 #
-#        USAGE: TODO
+#        USAGE: buks [--help|-h]
 #
-#  DESCRIPTION: TODO
+#  DESCRIPTION: Automatically opens PDFs in a specific directory.
 #
 #      OPTIONS: See usage function below.
-# REQUIREMENTS: TODO
+# REQUIREMENTS: zathura, nnn
 #         BUGS: ---
 #        NOTES: ---
 #       AUTHOR: Lancellotti Mattia
@@ -34,6 +34,20 @@ check_command() { command -v "$1" 1> /dev/null; }
 
 # Books will be stored in this directory
 BOOKS_DIR="${HOME}/books"
+
+# Help message triggered by the command below:
+#   $ buks [--help | -h]
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+  cat <<EOF
+buks - bash script to handle books.
+  It considers the book in the specified book directory
+  (by default: \${HOME}/books) and lets you read them.
+  It needs zathura and nnn.
+  Usage:
+    --help, -h: shows the this message.
+EOF
+  exit 0;
+fi
 
 # Checking if nnn is installed
 check_command nnn || { 
