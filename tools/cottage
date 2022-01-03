@@ -9,14 +9,15 @@
 #  DESCRIPTION: TODO
 #
 #      OPTIONS: See usage function below.
-# REQUIREMENTS: TODO
+# REQUIREMENTS: You should be using portage as main package manager.
 #         BUGS: ---
-#        NOTES: TODO
+#        NOTES: This is going to be renovated in the near future with the use of
+#               dialog.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.0
 #      CREATED: 27/12/2021
-#     REVISION: ---
+#     REVISION: 03/01/2022
 #==============================================================================
 
 # -- FUNCTION --
@@ -63,17 +64,16 @@ while read -r pkg; do
   fi
 done < "/var/lib/portage/world";
 
-if [ ! -s $UNINSTALL ] && [ ! -s $DESELECT ]; then
-  log "No packages selected to either be deleted or deselected. Exiting.."
-  exit 0;
-fi
-
+# Finally working with the packages you've selected before.
 if [ -s $UNINSTALL ] || [ -s $DESELECT ]; then
   # Cleaning portage's tree
   doas emerge --deselect $(cat $UNINSTALL);
   if [ -s $UNISNTALL ]; then
     doas emerge --ask --depclean;
   fi
+else
+  log "No packages selected to either be deleted or deselected. Exiting.."
+  exit 0;
 fi
 
 rm -f $UNINSTALL $DESELECT;
