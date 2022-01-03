@@ -1,15 +1,29 @@
 #!/bin/sh
 
-# Needed for `die_on_error`
-. $UTILITIES/include/system.sh
-. $UTILITIES/include/logging.sh
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a program is available through a built-in.
+# PARAMETER 1: Program needed.
+check_command() { command -v "$1" 1> /dev/null; }
+
+# -- FUNCTION --
+#        NAME: err
+# DESCRIPTION: Report errors to the users.
+# PARAMETER 1: Message to report.
+err() { [ $# -gt 0 ] && echo "!! $1" >&2; }
 
 # Checking if the script was used the right way
-[ $# -ne 1 ] && die_on_error "Usage: mkscript <script name>" 1;
+if [ $# -ne 1 ]; then
+  err "Usage: mkscript <script name>";
+  exit 1;
+fi
 
 # Creating the name and checking if the script doesn't exist already
 SCRIPT_NAME=${UTILITIES}/scripts/${1}
-check_command ${1} && die_on_error "${SCRIPT_NAME} already exists." 1;
+check_command ${1} && {
+  err "${SCRIPT_NAME} already exists.";
+  exit 1;
+}
 
 DATE=$(date +"%d/%m/%Y")
 echo "#!/bin/bash
