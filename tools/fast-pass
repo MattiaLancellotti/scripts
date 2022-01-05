@@ -19,17 +19,30 @@
 #      COMPANY: ---
 #      VERSION: 1.0
 #      CREATED: 01/11/2021
-#     REVISION: 08/11/2021
+#     REVISION: 05/01/2022
 #==============================================================================
 
 # Activating extended pattern matching
 shopt -s extglob
 
-source $UTILITIES/include/system.sh
-source $UTILITIES/include/logging.sh
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Reports messages and warnings.
+# PARAMETER 1: The message to report.
+log() { [ $# -gt 0 ] && echo ":: $1" >&1; }
+err() { [ $# -gt 0 ] && echo "!! $1" >&2; }
+
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a command is installed or not.
+# PARAMETER 1: The command to check.
+check_command() { [ $# -gt 0 ] && command -v "$1" > /dev/null; }
 
 # This script needs gpg
-check_command gpg || die_on_error "You need gpg to encrypt your passwords." 1;
+check_command gpg || {
+  err "You need gpg to encrypt your passwords.";
+  exit 1;
+}
 
 # Creating a local database
 PROG_FILES=${HOME}/.local/share/fast-pass
