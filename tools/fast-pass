@@ -74,7 +74,7 @@ list_passwds() {
 
   # Decrypting and listing the content of the archive
   gpg --decrypt --quiet --output $LOCAL_DB $ENCRYPTED_DB;
-  [ $? -ne 0 ] && die_on_error "Wrong password." 1;
+  [ $? -ne 0 ] && err "Wrong password." 1;
 
   tar -tvf $LOCAL_DB | awk '{print $6" (D"$4"T"$5")"}';
 
@@ -89,7 +89,7 @@ chck_passwd() {
   # stored.
   gpg --decrypt --quiet --output $LOCAL_DB $ENCRYPTED_DB;
   [ $? -ne 0 ] && \
-    warn "Wrong password." && exit 2;
+    err "Wrong password." && exit 2;
 
   # Searching for the password.
   local hash=$(echo $1 | sha256sum | awk '{print $1}');
@@ -106,7 +106,7 @@ show_passwd() {
   # Checking if the password is stored in the database.
   chck_passwd $1;
   case $? in
-    0) warn "Password not found in the database.";;
+    0) err "Password not found in the database.";;
     1) tar -xOf $LOCAL_DB $(echo $1 | sha256sum | awk '{print $1}');;
     *) exit $?;;
   esac
@@ -121,7 +121,7 @@ delete_passwd() {
 
   chck_passwd $1;
   case $? in
-    0) warn "Password not found in the database.";;
+    0) err "Password not found in the database.";;
     1) update_archive 0 $(echo $1 | sha256sum | awk '{print $1}');;
     *) exit $?;;
   esac
@@ -161,7 +161,7 @@ create_passwd() {
         create_archive   $(basename $pfile_db) || \
         update_archive 1 $(basename $pfile_db);;
 
-    1) warn "Password already stored.";;
+    1) err "Password already stored.";;
     *) exit $?;;
   esac
 
@@ -181,13 +181,13 @@ while [ $# -gt 0 ]; do
   case "$1" in
     # -z checks if the given string is null (the user didn't supply the name)
     -n)
-      [ ! -z $2 ] && create_passwd $2 || warn "$1: requires a parameter.";
+      [ ! -z $2 ] && create_passwd $2 || err "$1: requires a parameter.";
       exit 0;;
     -g)
-      [ ! -z $2 ] && show_passwd   $2 || warn "$1: requires a parameter.";
+      [ ! -z $2 ] && show_passwd   $2 || err "$1: requires a parameter.";
       exit 0;;
     -d)
-      [ ! -z $2 ] && delete_passwd $2 || warn "$1: requires a parameter.";
+      [ ! -z $2 ] && delete_passwd $2 || err "$1: requires a parameter.";
       exit 0;;
 
     # Previously this was checking only --new=*), but * also implies a null
@@ -205,8 +205,8 @@ while [ $# -gt 0 ]; do
     --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
 
     # Matching one of the given patterns
-    @(-*=)) warn "$1: requires an argument."; exit 1;;
-    @(-*)) warn "Unknown parameter $1."; exit 1;;
+    @(-*=)) err "$1: requires an argument."; exit 1;;
+    @(-*)) err "Unknown parameter $1."; exit 1;;
     *) show_passwd $1; exit 0;;
   esac
 done
