@@ -5,7 +5,7 @@
 #         FILE: lofi (bash version)
 #
 #        USAGE: lofi [-p <lofi type>|--play=<lofi type>] [-s|--stop]
-#                    [-l|--list] [-h|--help] [-m|--menu]
+#                    [-l|--list] [-h|--help]
 #
 #  DESCRIPTION: Plays different kinds of lofis in the background. The user can
 #               choose between: classic, sleepy or jazz. If no argument is
@@ -25,10 +25,9 @@
 #     REVISION: 20/12/2021
 #==============================================================================
 
-source $UTILITIES/include/logging.sh
-source $UTILITIES/include/system.sh
-
 declare -a PLAYER_ARGS=( "--profile=live-audio" )
+
+# These are the lofis available for now and the related links.
 declare -a LOFI_INDEXES=( "classic" "sleepy" "jazz" )
 declare -A LOFI_LINKS=( 
   [classic]="https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -43,18 +42,40 @@ TMP_FILE="/tmp/pid_lofi"
 trap "stopLofi" SIGINT
 
 # -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Report messages and errors to the user.
+# PARAMETER 1: The message to report.
+log() { [ $# -gt 0 ] && echo ":: $1" >&1; }
+err() { [ $# -gt 0 ] && echo "!! $1" >&2; }
+
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a command has been installed.
+# PARAMETER 1: The command.
+check_command() { [ $# -gt 0 ] && command -v "$1" 1> /dev/null; }
+
+# This checks if the mpv program is installed. It uses the above functions to do
+# it. This construct is very useful because it makes this special 'if-checking'
+# a lot more readable.
+check_command mpv || {
+  err "This script requires mpv to be installed.";
+  exit 1;
+}
+
+# -- FUNCTION --
 #        NAME: playLofi
 # DESCRIPTION: Plays the given lofi.
 # PARAMETER 1: The name of the lofi to play.
 playLofi() {
   # Checking if the player is already in execution
-  [ -f $TMP_FILE ] && \
-     warn "Lofi is already playing in the background." && exit 1
+  if [ -f "$TMP_FILE" ]; then
+     err "Lofi is already playing in the background.";
+     err "If not then something went wront and you should delete $TMP_FILE";
+     exit 1
+  fi
 
   # Going on with the execution of the player
   mpv ${PLAYER_ARGS[@]} ${LOFI_LINKS[$1]} &
-  [ $? == 127 ] && \
-     warn "This script requires mpv to be installed." && exit 127
 
   # Saving the pid for later use
   log "Playing $1 (${LOFI_LINKS[$1]}) lofi."
@@ -66,8 +87,13 @@ playLofi() {
 # DESCRIPTION: Kills the running instance.
 stopLofi() {
   # Checks if the player is in execution
-  [ -f $TMP_FILE ] && \
-    kill $(cat $TMP_FILE) && rm -f $TMP_FILE && log "Instance killed."
+  if [ -f "$TMP_FILE" ]; then
+    kill $(cat "$TMP_FILE");
+    rm -f "$TMP_FILE";
+    log "Instance killed.";
+  else
+    err "No PID file found in /tmp";
+  fi
 }
 
 # -- FUNCTION --
@@ -80,7 +106,6 @@ usage() {
     -s, --stop : kills the current instance
     -h, --help : prints out this message
     -l, --list : lists all possible lofis
-    -m, --menu : use dialog to list all the lofis
 EOT
 }
 
@@ -100,8 +125,8 @@ do
     --help|-h) usage; shift 1;;
     --list|-l) echo ${LOFI_INDEXES[@]}; shift 1;;
 
-    --play) warn "$1 requires an argument."; exit 1;;
-    *) warn "Unknown arg"; exit 1;;
+    --play) err "$1 requires an argument."; exit 1;;
+    *) err "Unknown arg"; exit 1;;
   esac
 done
 
