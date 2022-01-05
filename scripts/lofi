@@ -84,35 +84,6 @@ usage() {
 EOT
 }
 
-# -- FUNCTION --
-#         NAME: menu
-#  DESCRIPTION: Cretes a tty interface using dialog (see man dialog.1)
-menu() {
-  # Checks for running instances and asks the user if the music is to be changed
-  # or not via a simple yes/no dialog.
-  if [ -f $TMP_FILE ];
-  then
-    echo "Another instance of lofi is already running.";
-    echo "Do you want to kill it?";
-
-    read answer;
-    case "$answer" in
-      N|No|Nope) return 0;;
-      *) stopLofi;;
-    esac
-  fi
-
-  PS3="Select a track: ";
-  select lofi in ${LOFI_INDEXES[@]} None;
-  do
-    [[ "$lofi" == "None" ]] \
-      && echo "No track selected." \
-      || playLofi "$lofi";
-
-    return 0;
-  done
-}
-
 # If no arguments are supplied then play the classic lofi
 [ $# -eq 0 ] && playLofi "classic"
 
@@ -128,7 +99,6 @@ do
     --stop|-s) stopLofi; shift 1;;
     --help|-h) usage; shift 1;;
     --list|-l) echo ${LOFI_INDEXES[@]}; shift 1;;
-    --menu|-m) menu; shift 1;;
 
     --play) warn "$1 requires an argument."; exit 1;;
     *) warn "Unknown arg"; exit 1;;
