@@ -14,14 +14,14 @@
 #      OPTIONS: See usage function below.
 # REQUIREMENTS: basic busybox utilities
 #         BUGS: ---
-#        NOTES: This is a branch for testing a new form of notes. Basically
-#               instead of having all the notes in a single file, multiple files
-#               are going to be created and each of them rapresents a section.
+#        NOTES: Basically instead of having all the notes in a single
+#               file, multiple files are going to be created and each of them
+#               rapresents a section.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
-#      VERSION: 1.0
+#      VERSION: 1.1
 #      CREATED: 12/07/2021
-#     REVISION: 31/07/2021
+#     REVISION: 05/01/2022
 #==============================================================================
 
 shopt -s extglob
@@ -150,38 +150,27 @@ EOT
 }
 
 # If no argument is supplied then list all the notes
-[ $# -eq 0 ] && list;
+[ $# -eq 0 ] && list && exit 0;
 
-# Handling arguments
-set -- "$@"
-while [ "$#" -gt 0 ]; do
+# Parsing arguments
+OPTIONS=$(getopt --name "notes" --options "a:s:d:e:lh" \
+  --long "add:,section:,del:,edit:,list,help,delete-all" -- "$@")
+
+# Creating the command to set positional parameters
+eval set -- "$OPTIONS"
+while true; do
   case "$1" in
-    -a)
-      [ ! -z "$2" ] && add "$2" || err "$1: requires a parameter.";
-      exit 0;;
-    -s)
-      [ ! -z "$2" ] && SECTION=$2 || err "$1: requires a parameter.";
-      shift 2;;
-    -d)
-      [ ! -z "$2" ] && delete "$2" || err "$1: requires a parameter.";
-      exit 0;;
-    -e)
-      [ ! -z "$2" ] && edit "$2" || err "$1: requires a parameter.";
-      exit 0;;
+    --add|-a) add "$2"; exit 0;;
+    --del|-d) delete "$2"; exit 0;;
+    --edit|-e) edit "$2"; exit 0;;
+    --section|-s) SECTION="$2"; shift 2;;
 
-    --add=!()) add "${1#*=}"; exit 0;;
-    --section=!()) SECTION="${1#*=}"; shift 1;;
-    --del=!()) delete "${1#*=}"; exit 0;;
-    --edit=!()) edit "${1#*=}"; exit 0;;
-
-    -l|--list) list; exit 0;;
-    -h|--help) usage; exit 0;;
+    --list|-l) list; exit 0;;
+    --help|-h) usage; exit 0;;
     --delete-all) err "Deleting all your notes."; rm -f $NOTES_FILE; exit 0;;
 
-    @(-*=)) err "$1: requires an argument."; exit 1;;
-    @(-*)) err "Unknown argument '$1' given."; exit 1;;
-
-    *) list $@; exit 0;;
+    --) shift; break;;
+    ?) exit 0;;
   esac
 done
 
