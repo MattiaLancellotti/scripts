@@ -110,23 +110,25 @@ EOT
 }
 
 # If no arguments are supplied then play the classic lofi
-[ $# -eq 0 ] && playLofi "classic"
+[ $# -eq 0 ] && playLofi "classic" && exit 0;
 
-# Parses the arguments passed to the script.
-set -- $@
-while [ "$#" -gt 0 ];
-do
+# Parsing the arguments using getopt (be careful it's not getopts, man getopt)
+OPTIONS=$(getopt --name "lofi" --long "play:,stop,help,list" --options "p:lsh" -- "$@")
+
+# I spent the last 20 minutes trying to understand why I had to put the eval
+# before the actual command. The manpage has no information.
+# Basically if you try to execute the same commands in your shell (bash) without
+# eval, you'll see the arguments have ''.
+eval set -- "$OPTIONS"
+while true; do
   case "$1" in
-    -p) playLofi "$2"; shift 2;;
-
-    --play=*) playLofi "${1#*=}"; shift 1;;
-
+    --play|-p) playLofi "$2"; shift 2;;
     --stop|-s) stopLofi; shift 1;;
     --help|-h) usage; shift 1;;
     --list|-l) echo ${LOFI_INDEXES[@]}; shift 1;;
 
-    --play) err "$1 requires an argument."; exit 1;;
-    *) err "Unknown arg"; exit 1;;
+    --) shift; break;;
+    ?) exit 1;;
   esac
 done
 
