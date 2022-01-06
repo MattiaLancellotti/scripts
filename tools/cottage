@@ -57,11 +57,19 @@ while read -r pkg; do
     echo ${EQUERY};
   fi
 
-  log "${ELINES} dependencies found.";
+  log "${ELINES} dependency/(ies) found.";
   read -p "[~] Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
   if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
     echo "$pkg" >> $DESELECT;
   fi
+
+  # Cleaning the screen and moving the cursor to avoid writing stuff all over
+  # the screen. It also does not redraw the entire terminal but only the section
+  # previously occupied by the script. It helps my mental health not to go
+  # crazy while looking at a cool terminal full of hecky-hacky lines and then
+  # *poof* all gone because of a stupid script.
+  tput cuu $((${ELINES}+3));
+  tput ed;
 done < "/var/lib/portage/world";
 
 # Finally working with the packages you've selected before.
