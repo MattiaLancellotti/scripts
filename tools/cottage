@@ -39,6 +39,11 @@ fi
 # you accidentally find it.
 DESELECT="/tmp/radioactive_wastes";
 
+# A bunch of colors
+RED=$(tput setaf 1);
+GREEN=$(tput setaf 2);
+RESET=$(tput sgr0);
+
 # Reads all the entries in world, then checks whether they are needed by some
 # other programs. If not it is going to report it to the user.
 while read -r pkg; do
@@ -50,14 +55,14 @@ while read -r pkg; do
   ELINES=$(echo $EQUERY | wc -w);
 
   # A bit late, but the code is organized at least...
-  log "Checking dependencies for $pkg.";
+  log "Checking dependencies for $RED$pkg$RESET.";
   if [ ${ELINES} -gt 0 ]; then
     # Showing dependencies
     IFS=$' ';
-    echo ${EQUERY};
+    echo $GREEN${EQUERY}$RESET;
   fi
 
-  log "${ELINES} dependency/(ies) found.";
+  log "${ELINES} direct dependency/(ies) found.";
   read -p "[~] Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
   if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
     echo "$pkg" >> $DESELECT;
