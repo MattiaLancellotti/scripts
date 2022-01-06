@@ -34,46 +34,44 @@ if [ ! -f "${WORLD_SET}" ]; then
   exit 1;
 fi
 
-# The packages added to this file will actually be deleted.
-# Be carefull with the packages you add.
-UNINSTALL="/tmp/radioactive_wastes";
-
-# The packages added to this file only needs to be deselected and removed from
-# the main set. This was intended to store libraries and other packages needed
-# by some program whose presence in the set might create problems when updating
-# portage.
-DESELECT="/tmp/recycle";
+# A single file to group together all the packages you want to deselect and
+# eventually uninstall from the main portage tree. Do not delete this file if
+# you accidentally find it.
+DESELECT="/tmp/radioactive_wastes";
 
 # Reads all the entries in world, then checks whether they are needed by some
 # other programs. If not it is going to report it to the user.
 while read -r pkg; do
-  # Using equery to check dependencies.
-  if [ -z "$(equery --quiet depends $pkg)" ]; then
-    # Asking the user what to do next.
-    read -p "[~] Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
-    if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
-      echo "Deleting $pkg.";
-      echo "$pkg" >> $UNINSTALL;
-    fi
-  else
-    read -p "[~] Do you want to deselect $pkg? [y/N] " answer < /dev/stdout;
-    if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
-      echo "Deselecting $pkg.";
-      echo "$pkg" >> $DESELECT;
-    fi
+  # Saves the result of the query returned by equery, that is a list of
+  # dependecies that needs $pkg. Then calculates the number of dependencies that
+  # has been found by piping into wc the list. `wc -w` is going to analyze the
+  # string for words.
+  EQUERY=$(equery --quiet depends $pkg);
+  ELINES=$(echo $EQUERY | wc -w);
+
+  # A bit late, but the code is organized at least...
+  log "Checking dependencies for $pkg.";
+  if [ ${ELINES} -gt 0 ]; then
+    # Showing dependencies
+    IFS=$' ';
+    echo ${EQUERY};
+  fi
+
+  log "${ELINES} dependencies found.";
+  read -p "[~] Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
+  if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
+    echo "$pkg" >> $DESELECT;
   fi
 done < "/var/lib/portage/world";
 
 # Finally working with the packages you've selected before.
-if [ -s $UNINSTALL ] || [ -s $DESELECT ]; then
+if [ -s $DESELECT ]; then
   # Cleaning portage's tree
-  doas emerge --deselect $(cat $UNINSTALL);
-  if [ -s $UNISNTALL ]; then
-    doas emerge --ask --depclean;
-  fi
+  doas emerge --deselect $(cat $DESELECT);
+  doas emerge --ask --depclean;
 else
   log "No packages selected to either be deleted or deselected. Exiting.."
   exit 0;
 fi
 
-rm -f $UNINSTALL $DESELECT;
+rm -f $DESELECT;
