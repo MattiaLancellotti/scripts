@@ -4,9 +4,15 @@
 #
 #         FILE: cottage
 #
-#        USAGE: TODO
+#        USAGE: cottage
 #
-#  DESCRIPTION: TODO
+#  DESCRIPTION: This script is a package cleaner for gentoo. It interactively
+#               asks the user if a package should be deselected (removed from
+#               portage's main tree db) or not. This is done for each package
+#               contained in portage's world file.
+#               This is useful to me because I get gentoo dirty very quickly
+#               sometimes and don't have the time/memory to solve the problem.
+#               So at times I run this script.
 #
 #      OPTIONS: See usage function below.
 # REQUIREMENTS: You should be using portage as main package manager.
@@ -63,7 +69,7 @@ while read -r pkg; do
   fi
 
   log "${ELINES} direct dependency/(ies) found.";
-  read -p "[~] Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
+  read -p ":: Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
   if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
     echo "$pkg" >> $DESELECT;
   fi
