@@ -17,14 +17,19 @@
 #      OPTIONS: See usage function below.
 # REQUIREMENTS: You should be using portage as main package manager.
 #         BUGS: ---
-#        NOTES: This is going to be renovated in the near future with the use of
-#               dialog.
+#        NOTES: In the near future I'll try to make this general with some
+#               python script to make it available in other distribution.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.0
 #      CREATED: 27/12/2021
 #     REVISION: 03/01/2022
 #==============================================================================
+
+# TODO:
+#   - Add trap for Ctrl-C;
+#   - Add whitelist of programs;
+#   - Add blacklist of programs;
 
 # -- FUNCTION --
 #        NAME: log, err
