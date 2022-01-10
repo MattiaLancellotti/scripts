@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: cottage
+#
+#        USAGE: cottage
+#
+#  DESCRIPTION: This script is a package cleaner for gentoo. It interactively
+#               asks the user if a package should be deselected (removed from
+#               portage's main tree db) or not. This is done for each package
+#               contained in portage's world file.
+#               This is useful to me because I get gentoo dirty very quickly
+#               sometimes and don't have the time/memory to solve the problem.
+#               So at times I run this script.
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: You should be using portage as main package manager.
+#         BUGS: ---
+#        NOTES: In the near future I'll try to make this general with some
+#               python script to make it available in other distribution.
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.0
+#      CREATED: 27/12/2021
+#     REVISION: 03/01/2022
+#==============================================================================
+
+# TODO:
+#   - Add trap for Ctrl-C;
+#   - Add whitelist of programs;
+#   - Add blacklist of programs;
+
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Reporting messages to the user
+# PARAMETER 1: The message to report.
+log() { [ ${#*} -gt 0 ] && echo ":: $1" >&1; }
+err() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
+
+# This is the world set where all the packages installed by the user are stored.
+WORLD_SET="/var/lib/portage/world";
+if [ ! -f "${WORLD_SET}" ]; then
+  err "Portage's world set ${WORLD_SET} is not present.";
+  exit 1;
+fi
+
+# A single file to group together all the packages you want to deselect and
+# eventually uninstall from the main portage tree. Do not delete this file if
+# you accidentally find it.
+DESELECT="/tmp/radioactive_wastes";
+
+# A bunch of colors
+RED=$(tput setaf 1);
+GREEN=$(tput setaf 2);
+RESET=$(tput sgr0);
+
+# Reads all the entries in world, then checks whether they are needed by some
+# other programs. If not it is going to report it to the user.
+while read -r pkg; do
+  # Saves the result of the query returned by equery, that is a list of
+  # dependecies that needs $pkg. Then calculates the number of dependencies that
+  # has been found by piping into wc the list. `wc -w` is going to analyze the
+  # string for words.
+  EQUERY=$(equery --quiet depends $pkg);
+  ELINES=$(echo $EQUERY | wc -w);
+
+  # A bit late, but the code is organized at least...
+  log "Checking dependencies for $RED$pkg$RESET.";
+  if [ ${ELINES} -gt 0 ]; then
+    # Showing dependencies
+    IFS=$' ';
+    echo $GREEN${EQUERY}$RESET;
+  fi
+
+  log "${ELINES} direct dependency/(ies) found.";
+  read -p ":: Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
+  if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
+    echo "$pkg" >> $DESELECT;
+  fi
+
+  # Cleaning the screen and moving the cursor to avoid writing stuff all over
+  # the screen. It also does not redraw the entire terminal but only the section
+  # previously occupied by the script. It helps my mental health not to go
+  # crazy while looking at a cool terminal full of hecky-hacky lines and then
+  # *poof* all gone because of a stupid script.
+  tput cuu $((${ELINES}+3));
+  tput ed;
+done < "/var/lib/portage/world";
+
+# Finally working with the packages you've selected before.
+if [ -s $DESELECT ]; then
+  # Cleaning portage's tree
+  doas emerge --deselect $(cat $DESELECT);
+  doas emerge --ask --depclean;
+else
+  log "No packages selected to either be deleted or deselected. Exiting.."
+  exit 0;
+fi
+
+rm -f $DESELECT;

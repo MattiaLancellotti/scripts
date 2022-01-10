@@ -1,0 +1,136 @@
+#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: lofi (bash version)
+#
+#        USAGE: lofi [-p <lofi type>|--play=<lofi type>] [-s|--stop]
+#                    [-l|--list] [-h|--help]
+#
+#  DESCRIPTION: Plays different kinds of lofis in the background. The user can
+#               choose between: classic, sleepy or jazz. If no argument is
+#               supplied then the classic lofi will be played.
+#               These might be updated in the future so please take a look at
+#               the LOFI_INDEXES list.
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: bash, mpv (and a special profile)
+#         BUGS: ---
+#        NOTES: This script needs a profile for mpv. It's not a strict
+#               requirement but it would be better to have it.
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.1
+#      CREATED: 10/07/2021
+#     REVISION: 20/12/2021
+#==============================================================================
+
+declare -a PLAYER_ARGS=( "--profile=live-audio" )
+
+# These are the lofis available for now and the related links.
+declare -a LOFI_INDEXES=( "classic" "sleepy" "jazz" )
+declare -A LOFI_LINKS=( 
+  [classic]="https://www.youtube.com/watch?v=5qap5aO4i9A"
+  [sleepy]="https://www.youtube.com/watch?v=DWcJFNfaw9c"
+  [jazz]="https://www.youtube.com/watch?v=6uddGul0oAc"
+)
+
+# Place where the pid of the background-ed process is gonna end up
+TMP_FILE="/tmp/pid_lofi"
+
+# Executes stopLofi when the script is interrupted
+trap "stopLofi" SIGINT
+
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Report messages and errors to the user.
+# PARAMETER 1: The message to report.
+log() { [ $# -gt 0 ] && echo ":: $1" >&1; }
+err() { [ $# -gt 0 ] && echo "!! $1" >&2; }
+
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a command has been installed.
+# PARAMETER 1: The command.
+check_command() { [ $# -gt 0 ] && command -v "$1" 1> /dev/null; }
+
+# This checks if the mpv program is installed. It uses the above functions to do
+# it. This construct is very useful because it makes this special 'if-checking'
+# a lot more readable.
+check_command mpv || {
+  err "This script requires mpv to be installed.";
+  exit 1;
+}
+
+# -- FUNCTION --
+#        NAME: playLofi
+# DESCRIPTION: Plays the given lofi.
+# PARAMETER 1: The name of the lofi to play.
+playLofi() {
+  # Checking if the player is already in execution
+  if [ -f "$TMP_FILE" ]; then
+     err "Lofi is already playing in the background.";
+     err "If not then something went wront and you should delete $TMP_FILE";
+     exit 1
+  fi
+
+  # Going on with the execution of the player
+  mpv ${PLAYER_ARGS[@]} ${LOFI_LINKS[$1]} &
+
+  # Saving the pid for later use
+  log "Playing $1 (${LOFI_LINKS[$1]}) lofi."
+  echo $! > $TMP_FILE
+}
+
+# -- FUNCTION --
+#        NAME: stopLofi
+# DESCRIPTION: Kills the running instance.
+stopLofi() {
+  # Checks if the player is in execution
+  if [ -f "$TMP_FILE" ]; then
+    kill $(cat "$TMP_FILE");
+    rm -f "$TMP_FILE";
+    log "Instance killed.";
+  else
+    err "No PID file found in /tmp";
+  fi
+}
+
+# -- FUNCTION --
+#        NAME: usage
+# DESCRIPTION: Prints the usage of the script file.
+usage() {
+  cat <<- EOT
+  lofi - bash script to play lofizzz
+    -p, --play : specify a lofi to play
+    -s, --stop : kills the current instance
+    -h, --help : prints out this message
+    -l, --list : lists all possible lofis
+EOT
+}
+
+# If no arguments are supplied then play the classic lofi
+[ $# -eq 0 ] && playLofi "classic" && exit 0;
+
+# Parsing the arguments using getopt (be careful it's not getopts, man getopt)
+OPTIONS=$(getopt --name "lofi" --long "play:,stop,help,list" --options "p:lsh" -- "$@")
+
+# I spent the last 20 minutes trying to understand why I had to put the eval
+# before the actual command. The manpage has no information.
+# Basically if you try to execute the same commands in your shell (bash) without
+# eval, you'll see the arguments have ''.
+eval set -- "$OPTIONS"
+while true; do
+  case "$1" in
+    --play|-p) playLofi "$2"; shift 2;;
+    --stop|-s) stopLofi; shift 1;;
+    --help|-h) usage; shift 1;;
+    --list|-l) echo ${LOFI_INDEXES[@]}; shift 1;;
+
+    --) shift; break;;
+    ?) exit 1;;
+  esac
+done
+
+# Exiting successfully
+exit 0

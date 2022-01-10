@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+#==============================================================================
+#
+#         FILE: buks
+#
+#        USAGE: buks [--help|-h]
+#
+#  DESCRIPTION: Automatically opens PDFs in a specific directory.
+#
+#      OPTIONS: See usage function below.
+# REQUIREMENTS: zathura, nnn
+#         BUGS: ---
+#        NOTES: ---
+#       AUTHOR: Lancellotti Mattia
+#      COMPANY: ---
+#      VERSION: 1.0
+#      CREATED: 30/09/2021
+#     REVISION: 02/01/2022
+#==============================================================================
+
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Report messages.
+# PARAMETER 1: Message to report.
+log() { [ ${#*} -gt 0 ] && echo ":: $1" >&1; }
+err() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
+
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a program is available through a built-in.
+# PARAMETER 1: Program needed.
+check_command() { command -v "$1" 1> /dev/null; }
+
+# Books will be stored in this directory
+BOOKS_DIR="${HOME}/books"
+
+# Help message triggered by the command below:
+#   $ buks [--help | -h]
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+  cat <<EOF
+buks - bash script to handle books.
+  It considers the book in the specified book directory
+  (by default: \${HOME}/books) and lets you read them.
+  It needs zathura and nnn.
+  Usage:
+    --help, -h: shows the this message.
+EOF
+  exit 0;
+fi
+
+# Checking if nnn is installed
+check_command nnn || { 
+  err "You need nnn to run the script";
+  exit 1;
+}
+
+check_command zathura || {
+  warn "You need zathura to run the script";
+  exit 1;
+}
+
+# Checking if the directory exists.
+# If it does not, then warn the user and exit successfully.
+if [ ! -d $BOOKS_DIR ]; then
+  mkdir $BOOKS_DIR;
+  err "No books found.";
+  exit 0;
+fi
+
+# Listing books
+IFS=$'\n'
+BUKS=($(ls -w 1 $BOOKS_DIR))
+
+if [ ${#BUKS[@]} -eq 1 ]; then
+  zathura "$BOOKS_DIR/${BUKS[0]}";
+  exit 0;
+fi
+
+# Opening the explorer
+nnn $BOOKS_DIR;
+exit 0;

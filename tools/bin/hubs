@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# -- FUNCTION --
+#        NAME: log, err
+# DESCRIPTION: Reports errors, warnings and messages to the user.
+# PARAMETER 1: The message to report.
+log() { [ $# -gt 0 ] && echo ":: $1" >&1; }
+err() { [ $# -gt 0 ] && echo "!! $1" >&2; }
+
+# -- FUNCTION --
+#        NAME: check_command
+# DESCRIPTION: Checks whether a program is available through a built-in.
+# PARAMETER 1: Program needed.
+check_command() { command -v "$1" 1> /dev/null; }
+
+check_command curl || {
+  err "You need curl to run this script";
+  exit 1;
+}
+
+check_command jq   || {
+  err "You need jq to run this script";
+  exit 1;
+}
+
+HUBLINK=https://github.com/mattialancellotti
+declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
+  | jq '.[] | .name ' \
+  | tr --delete \"))
+
+log "Displaying all your repositories from $HUBLINK"
+for repository in ${REPO_LIST[@]}; do
+  # Defining path of the local repository
+  LOCAL_REPO="$HOME/code/$repository"
+  SHORT_NAME=${repository%%-*}
+
+  # Checking if the remote repository is present on the system
+  if [ -d $LOCAL_REPO ]; then
+    # Getting the last commit's relative date and printing it out
+    LAST_COMMIT=$(git -C $LOCAL_REPO log -1 --date=relative --format="%ah")
+    echo -e "[✓] $SHORT_NAME synched.\t($LAST_COMMIT)"
+  else
+    echo -e "[✗] $SHORT_NAME not synched."
+  fi
+done | sort -r
