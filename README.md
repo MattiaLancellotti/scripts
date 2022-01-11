@@ -1,7 +1,6 @@
-README
-------
+MY SCRIPTS
+----------
 
-## My scripts
 ### Introduction
 This repository stores a collection of scripts that I created and actively use
 to automate parts of my workflow or just having fun (I do enjoy writing shell
