@@ -9,8 +9,8 @@ RM   = rm
 #   - The target directory is the path in which programs appears to be
 #     installed;
 #   - The local directory of the package;
-STOWDIR = /usr/local/stow
-TARGDIR = /usr/local
+STOWDIR = $(HOME)/.local/share/stow
+TARGDIR = $(HOME)/.local/
 TOOLDIR = tools/
 
 # Important files and names
