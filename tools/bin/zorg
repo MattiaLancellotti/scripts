@@ -47,8 +47,8 @@ borg create --verbose --noatime \
   --compression auto,zstd,15 \
   "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
   /etc/ ${HOME}/music $KEYS_EXPORT ${HOME}/code ${HOME}/books \
-  ${HOME}/uniud ${HOME}/documents ${HOME}/pictures /var/lib/portage \
-  /proc/config.gz ${HOME}/.local/bin/dotfiles \
+  ${HOME}/documents ${HOME}/pictures /var/lib/portage \
+  /proc/config.gz \
   --exclude-caches
 
 # Deleting old backups
