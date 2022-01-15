@@ -4,13 +4,18 @@ TAR  = bsdtar
 GZIP = gzip
 RM   = rm
 
+# Common prefixes and paths
+prefix = $(HOME)/.local
+sbindir = $(prefix)/bin
+datarootdir = $(prefix)/share
+
 # Important directories:
 #   - The stow directory is the location of the all the packages;
 #   - The target directory is the path in which programs appears to be
 #     installed;
 #   - The local directory of the package;
-STOWDIR = $(HOME)/.local/share/stow
-TARGDIR = $(HOME)/.local/
+STOWDIR = $(datarootdir)/stow
+TARGDIR = $(sbindir)
 TOOLDIR = tools/
 
 # Important files and names
@@ -19,29 +24,30 @@ PROJDIR := $(wildcard ./*)
 TARNAME = utilities-1.0.0.tar
 ZIPNAME = $(TARNAME).gzip
 
-IFLAGS = --verbose=1 --target=$(TARGDIR) --dir=$(STOWDIR) --stow
-UFLAGS = --verbose=1 --target=$(TARGDIR) --dir=$(STOWDIR) --delete
+COMMON_FLAGS = --verbose=1 --target=$(TARGDIR) --dir=$(STOWDIR)
 TFLAGS = --create --verbose --file $(TARNAME)
 GFLAGS = --synchronous --keep --recursive
 RFLAGS = --recursive --force
 
+INSTALL_PROGRAM = $(STOW) $(COMMON_FLAGS)
+
 # Preparing the directory and copying the files
 $(STOWDIR)/$(TOOLDIR):
 	@echo "Creating the stow directory ($(STOWDIR))."
-	mkdir -p $(STOWDIR)
+	mkdir -p $(STOWDIR) $(TARGDIR)
 	@echo "Preparing the package."
 	cp -rv $(TOOLDIR) $(STOWDIR)
 
 .PHONY: install uninstall dist
 install:
 	@echo "Installing your package."
-	$(STOW) $(IFLAGS) $(TOOLDIR)
+	$(INSTALL_PROGRAM) --stow $(TOOLDIR)
 	@echo "Installation finished."
 
 # Removing links (or unstowing) the files in $(TARGDIR)
 uninstall:
 	@echo "Unstowing your package."
-	$(STOW) $(UFLAGS) $(TOOLDIR)
+	$(INSTALL_PROGRAM) --delete $(TOOLDIR)
 	@echo "Unstowed."
 
 # Creating a .tar.gz package
