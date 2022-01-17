@@ -24,8 +24,6 @@
 #     REVISION: 05/01/2022
 #==============================================================================
 
-shopt -s extglob
-
 # -- FUNCTION --
 #        NAME: log, err
 # DESCRIPTION: Report messages.
@@ -137,8 +135,8 @@ delete() {
 #        NAME: usage
 # DESCRIPTION: Prints the usage of the script file.
 usage() {
+  log "notes - Bash script to save some little useful notes"
   cat <<- EOT
-  notes - Bash script to save some little useful notes
     -h, --help    : prints this message
     -l, --list    : lists all your notes
     -a, --add     : adds a new note
