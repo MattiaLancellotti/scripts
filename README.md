@@ -26,11 +26,11 @@ guidelines (such as by Google's guideline).
 To easily install these utilities and scripts I created a Makefile that tries to
 follow GNU's standards target naming. The default target that gets always
 executed is a piece of code that generates the right directory structure in
-*/usr/local/stow*. Since I'm too lazy to write ebuilds in my case and other
+*${HOME}/.local/bin*. Since I'm too lazy to write ebuilds in my case and other
 installation scripts/methods/archives (whatever..) for other distros, most of
 the repos you find in this account will use `stow` as *package manager*.
 The available commands are listed below:
   - To install these utilities just run `make install`;
   - To uninstall them run `make uninstall` (this will not remove the *package*
-  from */usr/local/stow*;
+  from *${HOME}/.local/bin*);
   - To package everything into a single compressed archive run `make dist`.
