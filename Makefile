@@ -8,15 +8,11 @@ RM   = rm --recursive --force
 prefix = $(HOME)/.local
 
 # Important directories:
-#   - The stow directory is the location of the all the packages;
 #   - The target directory is the path in which programs appears to be
 #     installed;
-#   - The directory to which files will be copied;
-#   - The local directory of the package;
-STOWDIR = $(datarootdir)/stow
+#   - The stow directory is the location of the all the packages;
 sbindir = $(prefix)/bin
-datarootdir = $(prefix)/share
-TOOLDIR = tools/
+STOWDIR = ./
 
 # Important files and names
 #   - All the files contained in the root of the project;
@@ -30,25 +26,16 @@ GFLAGS = --synchronous --keep --recursive
 
 INSTALL_PROGRAM = $(STOW) $(COMMON_FLAGS)
 
-# Preparing the directory and copying the files
-$(TOOLDIR)($(TOOLDIR)*): $(STOWDIR)/$(TOOLDIR)
-	@echo "Preparing the package."
-	cp --recursive --verbose $% $(STOWDIR)/$(TOOLDIR)
-
-$(STOWDIR)/$(TOOLDIR):
-	@echo "Creating the stow directory ($(STOWDIR))."
-	mkdir -p $(STOWDIR) $(sbindir) $(STOWDIR)/$(TOOLDIR)
-
 .PHONY: install uninstall dist
 install:
 	@echo "Installing your package."
-	$(INSTALL_PROGRAM) --stow $(TOOLDIR)
+	$(INSTALL_PROGRAM) --stow tools
 	@echo "Installation finished."
 
 # Removing links (or unstowing) the files in $(TARGDIR)
 uninstall:
 	@echo "Uninstalling your package."
-	$(INSTALL_PROGRAM) --delete $(TOOLDIR)
+	$(INSTALL_PROGRAM) --delete tools
 	@echo "Done."
 
 # Creating a .tar.gz package
