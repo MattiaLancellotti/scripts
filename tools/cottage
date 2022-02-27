@@ -21,9 +21,9 @@
 #               python script to make it available in other distribution.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
-#      VERSION: 1.0
+#      VERSION: 1.1
 #      CREATED: 27/12/2021
-#     REVISION: 30/01/2022
+#     REVISION: 27/02/2022
 #==============================================================================
 
 # -- FUNCTION --
@@ -40,10 +40,9 @@ if [ ! -f "${WORLD_SET}" ]; then
   exit 1;
 fi
 
-# A single file to group together all the packages you want to deselect and
-# eventually uninstall from the main portage tree. Do not delete this file if
-# you accidentally find it.
-DESELECT="/tmp/radioactive_wastes";
+# A single variable to group together all the packages you want to deselect and
+# eventually uninstall from the main portage tree.
+DESELECT="";
 
 # A bunch of colors
 RED=$(tput setaf 1);
@@ -69,9 +68,11 @@ while read -r pkg; do
   fi
 
   log "${ELINES} direct dependency/(ies) found.";
-  read -p ":: Do you want to uninstall $pkg? [y/N] " answer < /dev/stdout;
+  read -p ":: Do you want to uninstall $pkg? [y/c/N] " answer < /dev/stdout;
   if [ "$answer" == "y" ] || [ "$answer" == "Y" ]; then
-    echo "$pkg" >> $DESELECT;
+    DESELECT+=" $pkg";
+  elif [ "$answer" == "c" ] || [ "$answer" == "C" ]; then
+    break;
   fi
 
   # Cleaning the screen and moving the cursor to avoid writing stuff all over
@@ -84,13 +85,11 @@ while read -r pkg; do
 done < "/var/lib/portage/world";
 
 # Finally working with the packages you've selected before.
-if [ -s $DESELECT ]; then
+if [ ! -z "$DESELECT" ]; then
   # Cleaning portage's tree
-  doas emerge --deselect $(cat $DESELECT);
+  doas emerge --deselect $DESELECT;
   doas emerge --ask --depclean;
 else
   log "No packages selected to either be deleted or deselected. Exiting.."
   exit 0;
 fi
-
-rm -f $DESELECT;
