@@ -1,4 +1,5 @@
 # Needed programs
+SHELL = /bin/sh
 STOW = stow
 TAR  = bsdtar
 GZIP = gzip
