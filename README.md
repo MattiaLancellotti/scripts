@@ -22,15 +22,14 @@ because I don't like how the code gets structured and sometimes because I need
 to use strcutures like arrays and lists that are not suggested general
 guidelines (such as by Google's guideline).
 
-### Installation
-To easily install these utilities and scripts I created a Makefile that tries to
-follow GNU's standards target naming. The default target that gets always
-executed is a piece of code that generates the right directory structure in
-*${HOME}/.local/bin*. Since I'm too lazy to write ebuilds in my case and other
-installation scripts/methods/archives (whatever..) for other distros, most of
-the repos you find in this account will use `stow` as *package manager*.
+### Configuration
+To easily install these scripts, I created a Makefile that tries to
+follow GNU's standard's naming scheme. The default target is `make install` and
+it tries to put these scripts into *${HOME}/.local/bin*. Since I'm too lazy to
+write ebuilds in my case and other installation scripts/methods/archives for
+other distros, most of the repos you find in this account will use `stow`
+as *package manager*.  
 The available commands are listed below:
   - To install these utilities just run `make install`;
-  - To uninstall them run `make uninstall` (this will not remove the *package*
-  from *${HOME}/.local/bin*);
+  - To uninstall them run `make uninstall`;
   - To package everything into a single compressed archive run `make dist`.
