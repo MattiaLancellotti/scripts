@@ -46,3 +46,5 @@ dist:
 	$(GZIP) $(GFLAGS) $(TARNAME)
 	$(RM) $(TARNAME)
 	@echo "Done."
+
+.DEFAULT = install
