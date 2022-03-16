@@ -22,9 +22,6 @@
 #     REVISION: 05/01/2022
 #==============================================================================
 
-# Activating extended pattern matching
-shopt -s extglob
-
 # -- FUNCTION --
 #        NAME: log, err
 # DESCRIPTION: Reports messages and warnings.
@@ -173,41 +170,21 @@ create_passwd() {
 [ $# -eq 0 ] && usage;
 
 # Parses the arguments passed to the script.
-set -- "$@"
-while [ $# -gt 0 ]; do
+OPTIONS=$(getopt --name "fast-pass" --long "new:,get:,del:,list,help" --options "n:g:d:lh" -- "$@")
 
-  # All the pattern-matching below is safe so that the script won't break if the
-  # user isn't smart.
+eval set -- "$OPTIONS"
+while true; do
   case "$1" in
-    # -z checks if the given string is null (the user didn't supply the name)
-    -n)
-      [ ! -z $2 ] && create_passwd $2 || err "$1: requires a parameter.";
-      exit 0;;
-    -g)
-      [ ! -z $2 ] && show_passwd   $2 || err "$1: requires a parameter.";
-      exit 0;;
-    -d)
-      [ ! -z $2 ] && delete_passwd $2 || err "$1: requires a parameter.";
-      exit 0;;
-
-    # Previously this was checking only --new=*), but * also implies a null
-    # string so '--new=' could be used and it would break the script. To avoid
-    # this inconvenient I'm using bash's extended pattern matching
-    # (shopt extglob) !() that translates to "match everything except a null
-    # string".
-    --new=!()) create_passwd ${1#*=}; exit 0;;
-    --get=!()) show_passwd ${1#*=}; exit 0;;
-    --del=!()) delete_passwd ${1#*=}; exit 0;;
-
+    --new|-n) create_passwd "$2"; exit 0;;
+    --get|-g) show_passwd "$2";   exit 0;;
+    --del|-d) delete_passwd "$2"; exit 0;;
     --list|-l) list_passwds; exit 0;;
     --help|-h) usage; exit 0;;
 
     --delete-all) rm -rf $ENCRYPTED_DB; exit 0;;
 
-    # Matching one of the given patterns
-    @(-*=)) err "$1: requires an argument."; exit 1;;
-    @(-*)) err "Unknown parameter $1."; exit 1;;
-    *) show_passwd $1; exit 0;;
+    --) shift; break;;
+    ?) exit 0;;
   esac
 done
 
