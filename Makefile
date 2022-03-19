@@ -31,6 +31,7 @@ INSTALL_PROGRAM = $(STOW) $(COMMON_FLAGS)
 install:
 	@echo "Installing your package."
 	$(INSTALL_PROGRAM) --stow tools
+	mkdir -p $(sbindir)
 	@echo "Installation finished."
 
 # Removing links (or unstowing) the files in $(TARGDIR)
