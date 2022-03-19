@@ -15,10 +15,9 @@
 #               So at times I run this script.
 #
 #      OPTIONS: See usage function below.
-# REQUIREMENTS: You should be using portage as main package manager.
+# REQUIREMENTS: You should be using portage as package manager.
 #         BUGS: ---
-#        NOTES: In the near future I'll try to make this general with some
-#               python script to make it available in other distribution.
+#        NOTES: ---
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
 #      VERSION: 1.1
