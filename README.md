@@ -22,7 +22,7 @@ because I don't like how the code gets structured and sometimes because I need
 to use strcutures like arrays and lists that are not suggested general
 guidelines (such as by Google's guideline).
 
-### Configuration
+### Installation
 To easily install these scripts, I created a Makefile that tries to
 follow GNU's standard's naming scheme. The default target is `make install` and
 it tries to put these scripts into *${HOME}/.local/bin*. Since I'm too lazy to
@@ -33,3 +33,11 @@ The available commands are listed below:
   - To install these utilities just run `make install`;
   - To uninstall them run `make uninstall`;
   - To package everything into a single compressed archive run `make dist`.
+
+### Configuration
+Some of these scripts need to be configured before use. *cottage* for example is
+a specific script a wrote for maintaining and cleaning a gentoo system. The main
+core is multiplatform since it just shows the package from a given list (either
+a file or a command output), the only gentoo-specific code in the script are the
+emerge commands used to uninstall programs. *zorg* is a back-up script that
+needs the user to modify the paths to save in the archive.
