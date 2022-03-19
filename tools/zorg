@@ -46,8 +46,8 @@ borg create --verbose --noatime \
   --progress --comment "$1" \
   --compression auto,zstd,15 \
   "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
-  /etc/ ${HOME}/music $KEYS_EXPORT ${HOME}/code ${HOME}/books \
-  ${HOME}/documents ${HOME}/pictures /var/lib/portage \
+  /etc/ ${HOME}/music $KEYS_EXPORT ${HOME}/code \
+  ${HOME}/documents ${HOME}/pictures /var/lib/portage/world \
   /proc/config.gz \
   --exclude-caches
 
