@@ -30,8 +30,8 @@ INSTALL_PROGRAM = $(STOW) $(COMMON_FLAGS)
 .PHONY: install uninstall dist
 install:
 	@echo "Installing your package."
-	$(INSTALL_PROGRAM) --stow tools
 	mkdir -p $(sbindir)
+	$(INSTALL_PROGRAM) --stow tools
 	@echo "Installation finished."
 
 # Removing links (or unstowing) the files in $(TARGDIR)
