@@ -22,13 +22,21 @@ because I don't like how the code gets structured and sometimes because I need
 to use strcutures like arrays and lists that are not suggested general
 guidelines (such as by Google's guideline).
 
+### Dependencies
+As I've already pointed out most of these scripts are written in **GNU Bash**
+because I like writing in it. Don't worry scripts that don't need bash-isms are
+not bash only. Instead of just moving files around and creating complicated
+logic through scripts and makefiles I decided that a simple but powerful
+approach was the way to go, that's why you also need **stow** that links files
+around your file system.
+
 ### Installation
 To easily install these scripts, I created a Makefile that tries to
-follow GNU's standard's naming scheme. The default target is `make install` and
-it tries to put these scripts into *${HOME}/.local/bin*. Since I'm too lazy to
-write ebuilds in my case and other installation scripts/methods/archives for
-other distros, most of the repos you find in this account will use `stow`
-as *package manager*.  
+follow GNU's standard's naming scheme (in case you want to read it). The default
+target is `make install` and it searches for  *${HOME}/.local/bin*, `stow` will
+do the rest. The important thing to remember is that you **must not** move this
+folder once you've executed the installation recipe, or else the stow's links
+will break.  
 The available commands are listed below:
   - To install these utilities just run `make install`;
   - To uninstall them run `make uninstall`;
