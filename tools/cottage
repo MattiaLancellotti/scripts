@@ -36,6 +36,7 @@ err() { echo "!! $1" >&2; }
 WORLD_SET="/var/lib/portage/world";
 if [ ! -f "${WORLD_SET}" ]; then
   err "Portage's world set ${WORLD_SET} is not present.";
+  err "This script only works on Gentoo or distros with Portage.";
   exit 1;
 fi
 
