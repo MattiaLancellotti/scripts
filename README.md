@@ -27,8 +27,8 @@ As I've already pointed out most of these scripts are specifically written in
 **GNU Bash**, while some others can be executed by your */bin/sh* that in my
 case is **Dash**. Instead of just moving files around and creating complicated
 logic through scripts and makefiles I decided that a simple but powerful
-approach was the way to go, that's why you also need **stow** that links files
-around your file system.
+approach was the way to go, that's why you also need **GNU Stow** that links
+files around your file system.  
 
 ### Installation
 To easily install these scripts, I created a Makefile that tries to
