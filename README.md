@@ -23,9 +23,9 @@ to use strcutures like arrays and lists that are not suggested general
 guidelines (such as by Google's guideline).
 
 ### Dependencies
-As I've already pointed out most of these scripts are written in **GNU Bash**
-because I like writing in it. Don't worry scripts that don't need bash-isms are
-not bash only. Instead of just moving files around and creating complicated
+As I've already pointed out most of these scripts are specifically written in
+**GNU Bash**, while some others can be executed by your */bin/sh* that in my
+case is **Dash**. Instead of just moving files around and creating complicated
 logic through scripts and makefiles I decided that a simple but powerful
 approach was the way to go, that's why you also need **stow** that links files
 around your file system.
