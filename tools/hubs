@@ -23,12 +23,22 @@ check_command jq   || {
   exit 1;
 }
 
-HUBLINK=https://github.com/mattialancellotti
+# Some useful variables
+USERNAME="mattialancellotti"
+APISLINK="https://api.github.com/users/${USERNAME}/repos"
+HUBSLINK="https://github.com/${mattialancellotti}"
+
+# This is a bit weird but really cool.
+# Basically it retrieves all your github repositories through a curl request to
+# GitHub's APIs. Once the curl got the JSON, it's passed to jq to parse it and
+# to get just the names. Finally deletes the useless " that comes with the JSON.
 declare -a REPO_LIST=($(curl -s https://api.github.com/users/mattialancellotti/repos \
   | jq '.[] | .name ' \
   | tr --delete \"))
 
-log "Displaying all your repositories from $HUBLINK"
+# Displaying all the repos and checking whether each of them is locally synched
+# or not.
+log "Displaying all your repositories from $USERNAME"
 for repository in ${REPO_LIST[@]}; do
   # Defining path of the local repository
   LOCAL_REPO="$HOME/code/$repository"
