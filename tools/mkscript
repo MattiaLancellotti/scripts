@@ -19,7 +19,7 @@ if [ $# -ne 1 ]; then
 fi
 
 # Creating the name and checking if the script doesn't exist already
-SCRIPT_NAME=${UTILITIES}/scripts/${1}
+SCRIPT_NAME=${UTILITIES}/${1}
 check_command ${1} && {
   err "${SCRIPT_NAME} already exists.";
   exit 1;
@@ -46,7 +46,7 @@ echo "#!/bin/bash
 #      CREATED: ${DATE}
 #     REVISION: ---
 #==============================================================================
-" >> ${SCRIPT_NAME}
+" > ${SCRIPT_NAME}
 
 chmod +x $SCRIPT_NAME
 $EDITOR $SCRIPT_NAME
