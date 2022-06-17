@@ -41,8 +41,8 @@ gpg --export --output $KEYS_EXPORT
 
 # Creating a new backup
 log "Creating your backup."
-borg create --verbose --noatime \
-  --stats --list --numeric-owner \
+borg create --verbose \
+  --stats --list --numeric-ids \
   --progress --comment "$1" \
   --compression auto,zstd,15 \
   "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
