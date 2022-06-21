@@ -47,7 +47,8 @@ borg create --verbose \
   --compression auto,zstd,15 \
   "${MOUNT_POINT}/backups"::{user}-{now:%Y-%m-%dT%H:%M:%S} \
   $KEYS_EXPORT /etc/ ${HOME}/music ${HOME}/code ${HOME}/documents \
-  ${HOME}/pictures /var/lib/portage/world /proc/config.gz ${HOME}/.ssh \
+  ${HOME}/pictures /var/lib/portage/world /proc/config.gz ${HOME}/.ssh
+  ${HOME}/.mozilla \
   --exclude-caches
 
 # Deleting old backups
