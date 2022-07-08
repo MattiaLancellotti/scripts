@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #==============================================================================
 #
@@ -38,7 +38,8 @@ err() { [ ${#*} -gt 0 ] && echo "!! $1" >&2; }
 check_command() { command -v "$1" 1> /dev/null; }
 
 # Notes' path
-NOTES_PATH=~/.local/share/notes
+[ -z "$XDG_DATA_HOME" ] && err "No $XDG_DATA_HOME set." && exit 1;
+NOTES_PATH="$XDG_DATA_HOME/notes"
 mkdir -p $NOTES_PATH
 
 # Specified section
