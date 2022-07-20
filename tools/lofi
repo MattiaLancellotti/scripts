@@ -20,9 +20,9 @@
 #               requirement but it would be better to have it.
 #       AUTHOR: Lancellotti Mattia
 #      COMPANY: ---
-#      VERSION: 1.1
+#      VERSION: 1.2
 #      CREATED: 10/07/2021
-#     REVISION: 20/12/2021
+#     REVISION: 20/07/2022
 #==============================================================================
 
 declare -a PLAYER_ARGS=( "--profile=live-audio" )
@@ -30,7 +30,7 @@ declare -a PLAYER_ARGS=( "--profile=live-audio" )
 # These are the lofis available for now and the related links.
 declare -a LOFI_INDEXES=( "classic" "sleepy" "jazz" )
 declare -A LOFI_LINKS=( 
-  [classic]="https://www.youtube.com/watch?v=5qap5aO4i9A"
+  [classic]="https://www.youtube.com/watch?v=jfKfPfyJRdk"
   [sleepy]="https://www.youtube.com/watch?v=DWcJFNfaw9c"
   [jazz]="https://www.youtube.com/watch?v=6uddGul0oAc"
 )
@@ -69,9 +69,8 @@ check_command mpv || {
 playLofi() {
   # Checking if the player is already in execution
   if [ -f "$TMP_FILE" ]; then
-     err "Lofi is already playing in the background.";
-     err "If not then something went wront and you should delete $TMP_FILE";
-     exit 1
+     log "Changing track to $1.";
+     stopLofi 1> /dev/null
   fi
 
   # Going on with the execution of the player
@@ -100,8 +99,8 @@ stopLofi() {
 #        NAME: usage
 # DESCRIPTION: Prints the usage of the script file.
 usage() {
+  log "lofi - bash script to play lofizzz"
   cat <<- EOT
-  lofi - bash script to play lofizzz
     -p, --play : specify a lofi to play
     -s, --stop : kills the current instance
     -h, --help : prints out this message
